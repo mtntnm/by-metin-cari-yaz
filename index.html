@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>By METİN - Cari & Kasa Takip</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        body { font-size: 12px; font-family: system-ui, -apple-system, sans-serif; transition: background-color 0.3s, color 0.3s; }
+        .dark-mode { background-color: #0b1920; color: #e2e8f0; }
+        .light-mode { background-color: #f8fafc; color: #0f172a; }
+        .compact-table td, .compact-table th { padding: 6px 8px; }
+        .app-container { height: 100vh; display: flex; flex-direction: column; overflow: hidden; max-width: 480px; margin: 0 auto; justify-content: space-between; }
+        .content-area { flex: 1; overflow-y: auto; padding-bottom: 85px; }
+        ::-webkit-scrollbar { width: 4px; }
+        .dark-mode ::-webkit-scrollbar-track { background: #0b1920; }
+        .dark-mode ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
+        .light-mode ::-webkit-scrollbar-track { background: #f1f5f9; }
+        .light-mode ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+    </style>
+</head>
+<body class="dark-mode antialiased" id="appBody">
+    <div class="app-container relative">
+        <header class="flex justify-between items-center px-4 pt-8 pb-2.5 border-b border-slate-700/80" id="mainHeader">
+            <button onclick="openMenuModal()" class="flex items-center space-x-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-600/60 transition active:scale-95">
+                <i data-lucide="menu" class="w-4 h-4 text-emerald-400"></i>
+                <span class="text-xs font-bold">Menü</span>
+            </button>
+            <div class="text-center">
+                <div class="text-xs font-bold tracking-wide text-emerald-400" id="headerTitle">METİN</div>
+                <div class="text-[10px] text-slate-300 font-medium" id="headerSubTitle">Metin Türk</div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span id="cloudStatusBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700" title="Bulut Durumu">☁️</span>
+                <button onclick="togglePrivacy()" id="privacyBtn" class="p-1.5 rounded hover:bg-slate-800" title="Bakiyeleri Gizle / Göster">
+                    <i data-lucide="eye" class="w-4 h-4 text-emerald-400"></i>
+                </button>
+                <button onclick="openSettings()" class="p-1.5 rounded hover:bg-slate-800 text-slate-200" title="Ayarlar & Yedek">
+                    <i data-lucide="settings" class="w-4 h-4 text-slate-200"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="content-area p-3 space-y-3">
+            <div class="card-bg p-3 rounded-xl border border-slate-700 shadow-lg space-y-2.5 bg-[#11222b]">
+                <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+                    <div>
+                        <div class="text-[10px] font-semibold text-slate-300">GENEL NET BAKIYE</div>
+                        <div class="text-base font-extrabold text-emerald-400 maskable-amount" id="toplamAyBakiye">0,00 ₺</div>
+                    </div>
+                    <div class="text-right space-y-0.5">
+                        <div class="text-[10px] text-emerald-400 font-medium">Nakit Kalan: <span class="font-bold maskable-amount" id="nakitKalan">0,00 ₺</span></div>
+                        <div class="text-[10px] text-blue-400 font-medium">Kredi Kalan: <span class="font-bold maskable-amount" id="krediKalan">0,00 ₺</span></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5 bg-[#09141a] p-2 rounded-lg text-center">
+                    <div>
+                        <div class="text-[9px] text-emerald-400 font-semibold">NAKİT GELİR</div>
+                        <div class="text-xs font-bold text-emerald-300 maskable-amount" id="toplamNakitGelir">0,00 ₺</div>
+                    </div>
+                    <div>
+                        <div class="text-[9px] text-blue-400 font-semibold">KREDİ GELİR</div>
+                        <div class="text-xs font-bold text-blue-300 maskable-amount" id="toplamKrediGelir">0,00 ₺</div>
+                    </div>
+                    <div>
+                        <div class="text-[9px] text-rose-400 font-semibold">GİDER / ÖDEME</div>
+                        <div class="text-xs font-bold text-rose-300 maskable-amount" id="toplamGiderOzet">0,00 ₺</div>
+                    </div>
+                </div>
+                <div class="w-full h-12">
+                    <canvas id="miniSummaryChart"></canvas>
+                </div>
+            </div>
+
+            <div id="view-islemler" class="space-y-2">
+                <div class="flex justify-between items-center px-1">
+                    <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">CARİ VE TEDARİKÇİ HESAPLARI</span>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="switchView('cariEkle')" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-lg font-bold flex items-center shadow-md">
+                            <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Yeni Cari
+                        </button>
+                        <button onclick="shareCarilerWhatsapp()" class="text-[10px] bg-emerald-800 hover:bg-emerald-900 text-emerald-100 px-2 py-1 rounded font-medium flex items-center border border-emerald-600/50">
+                            <i data-lucide="message-square" class="w-3 h-3 mr-1"></i> WhatsApp Cari Raporu
+                        </button>
+                    </div>
+                </div>
+                <div id="cariHesaplarListesi" class="space-y-1.5"></div>
+            </div>
+
+            <div id="view-gelir" class="hidden bg-[#11222b] p-3 rounded-xl border border-slate-700 space-y-3">
+                <h3 class="text-xs font-bold text-emerald-400 uppercase flex items-center">
+                    <i data-lucide="plus-circle" class="w-4 h-4 mr-1.5"></i> Günlük Satış / Gelir Kaydı
+                </h3>
+                <form id="satisForm" onsubmit="handleSatisSubmit(event)" class="space-y-2 text-xs">
+                    <div>
+                        <label class="block text-[10px] text-slate-300 mb-1">Tarih</label>
+                        <input type="date" id="satisTarih" required class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-emerald-400 mb-1">Nakit Satış Tutarı (₺)</label>
+                        <input type="number" step="0.01" min="0" id="satisNakit" placeholder="0.00" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-blue-400 mb-1">Kredi Kartı Satış Tutarı (₺)</label>
+                        <input type="number" step="0.01" min="0" id="satisKredi" placeholder="0.00" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded text-xs">Geliri Kaydet</button>
+                </form>
+            </div>
+
+            <div id="view-gider" class="hidden bg-[#11222b] p-3 rounded-xl border border-slate-700 space-y-3">
+                <h3 class="text-xs font-bold text-rose-400 uppercase flex items-center">
+                    <i data-lucide="minus-circle" class="w-4 h-4 mr-1.5"></i> Firma Ödemesi / Gider Kaydı
+                </h3>
+                <form id="odemeForm" onsubmit="handleOdemeSubmit(event)" class="space-y-2 text-xs">
+                    <div>
+                        <label class="block text-[10px] text-slate-300 mb-1">Tarih</label>
+                        <input type="date" id="odemeTarih" required class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-300 mb-1">Ödeme Yapılacak Cari veya Gider Adı</label>
+                        <select id="odemeCariSelect" onchange="toggleHariciGiderInput()" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white mb-1.5">
+                            <option value="__HARICI__">-- Cari Seçin --</option>
+                        </select>
+                        <input type="text" id="odemeFirma" placeholder="Örn: Elektrik Faturası, Aslan Oyuncak" required class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-300 mb-1">Tutar (₺)</label>
+                        <input type="number" step="0.01" min="0.01" id="odemeTutar" placeholder="0.00" required class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-300 mb-1">Ödeme Türü</label>
+                        <select id="odemeTur" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                            <option value="Nakit">Nakit Kasadan</option>
+                            <option value="Kredi Kartı">Kredi Kartı / Banka</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 rounded text-xs">Gideri Kaydet</button>
+                </form>
+            </div>
+
+            <!-- HAREKETLER SEKMESİ -->
+            <div id="view-notlar" class="hidden space-y-2">
+                <div class="bg-[#11222b] p-2.5 rounded-xl border border-slate-700 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-200">Kasa ve işlem günlüğü</span>
+                        <button onclick="shareKasaWhatsapp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] px-2.5 py-1.5 rounded flex items-center font-semibold">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5 mr-1"></i> WhatsApp Rapor
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800">
+                        <div>
+                            <label class="block text-[9px] text-slate-400 mb-0.5">Başlangıç Tarihi</label>
+                            <input type="date" id="wpBaslangicTarih" class="w-full p-1 bg-[#09141a] border border-slate-700 rounded text-white text-[10px]">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] text-slate-400 mb-0.5">Bitiş Tarihi</label>
+                            <input type="date" id="wpBitisTarih" class="w-full p-1 bg-[#09141a] border border-slate-700 rounded text-white text-[10px]">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-[#11222b] rounded-xl border border-slate-700 overflow-hidden max-h-[350px] overflow-y-auto">
+                    <table class="w-full text-left text-xs compact-table divide-y divide-slate-800">
+                        <thead class="bg-[#09141a] text-slate-300 sticky top-0">
+                            <tr>
+                                <th onclick="toggleSort('tarih')" class="cursor-pointer hover:text-emerald-400 select-none">Tarih <span id="sortIconTarih" class="text-[10px]"></span></th>
+                                <th>Tür / Açıklama</th>
+                                <th onclick="toggleSort('tutar')" class="cursor-pointer hover:text-emerald-400 select-none text-right">Tutar <span id="sortIconTutar" class="text-[10px]"></span></th>
+                                <th class="text-center">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kasaLogTable" class="divide-y divide-slate-800/60"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-cariEkle" class="hidden bg-[#11222b] p-3 rounded-xl border border-slate-700 space-y-3">
+                <h3 class="text-xs font-bold text-amber-400 uppercase flex items-center">
+                    <i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Yeni Cari Hesap Kaydı
+                </h3>
+                <form id="cariForm" onsubmit="handleCariSubmit(event)" class="space-y-2 text-xs">
+                    <div>
+                        <label class="block text-[10px] text-slate-300 mb-1">Firma / Kişi Adı</label>
+                        <input type="text" id="cariFirma" placeholder="Örn: Aden Glass" required class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-300 mb-1">Açılış İşlem Tipi</label>
+                        <select id="cariIslemTip" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                            <option value="alis">Mal Alışı / Borçlandır (+)</option>
+                            <option value="odeme">Ödeme Yapıldı / Düş (-)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-300 mb-1">Tutar (₺)</label>
+                        <input type="number" step="0.01" min="0" id="cariTutar" placeholder="0.00" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-300 mb-1">Açıklama / Not</label>
+                        <input type="text" id="cariAciklama" placeholder="Fatura veya not" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                    </div>
+                    <div class="flex gap-2 pt-1">
+                        <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded text-xs">Cariyi Kaydet</button>
+                        <button type="button" onclick="switchView('islemler')" class="bg-slate-700 text-white px-3 py-2 rounded text-xs">İptal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <nav class="bg-[#071116] border-t border-slate-800 flex justify-around items-stretch py-2 px-1.5 z-20 min-h-[68px]">
+            <button onclick="switchView('notlar')" id="nav-notlar" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-300 hover:text-white active:bg-slate-800/60 transition">
+                <i data-lucide="file-text" class="w-6 h-6 mb-1"></i>
+                <span class="text-[11px] font-bold tracking-tight">HAREKETLER</span>
+            </button>
+            <button onclick="switchView('islemler')" id="nav-islemler" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl text-emerald-400 font-extrabold active:bg-slate-800/60 transition">
+                <i data-lucide="users" class="w-6 h-6 mb-1"></i>
+                <span class="text-[11px] font-bold tracking-tight">CARİLER</span>
+            </button>
+            <button onclick="switchView('gelir')" id="nav-gelir" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-300 hover:text-white active:bg-slate-800/60 transition">
+                <i data-lucide="plus-circle" class="w-6 h-6 mb-1"></i>
+                <span class="text-[11px] font-bold tracking-tight">GELİR</span>
+            </button>
+            <button onclick="switchView('gider')" id="nav-gider" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-300 hover:text-white active:bg-slate-800/60 transition">
+                <i data-lucide="minus-circle" class="w-6 h-6 mb-1"></i>
+                <span class="text-[11px] font-bold tracking-tight">GİDER</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- HIZLI MENÜ MODALI -->
+    <div id="menuModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
+        <div class="bg-[#11222b] border border-slate-700 rounded-2xl shadow-2xl w-full max-w-sm p-4 space-y-3.5 text-slate-200 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+                <div>
+                    <h3 class="text-sm font-extrabold text-emerald-400">Hızlı Menü & Raporlar</h3>
+                    <div class="text-[10px] text-slate-300 font-medium" id="menuUserName">Metin Türk</div>
+                </div>
+                <button onclick="closeMenuModal()" class="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">✕</button>
+            </div>
+
+            <div class="space-y-1.5">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ciro Özeti</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-[#09141a] p-2.5 rounded-xl border border-emerald-500/30">
+                        <div class="flex justify-between items-center text-[10px] text-emerald-400 font-semibold mb-1"><span>Bugün Ciro</span><i data-lucide="trending-up" class="w-3.5 h-3.5"></i></div>
+                        <div class="text-sm font-extrabold text-white maskable-amount" id="menuBugunCiro">0,00 ₺</div>
+                        <div class="text-[9px] text-slate-400 mt-0.5" id="menuBugunDetay">Nakit: 0₺ | Kredi: 0₺</div>
+                    </div>
+                    <div class="bg-[#09141a] p-2.5 rounded-xl border border-blue-500/30">
+                        <div class="flex justify-between items-center text-[10px] text-blue-400 font-semibold mb-1"><span>Son 7 Gün Ciro</span><i data-lucide="calendar" class="w-3.5 h-3.5"></i></div>
+                        <div class="text-sm font-extrabold text-white maskable-amount" id="menuHaftalikCiro">0,00 ₺</div>
+                        <div class="text-[9px] text-slate-400 mt-0.5" id="menuHaftalikDetay">Nakit: 0₺ | Kredi: 0₺</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TARİH ARALIKLI KASA & SATIŞ RAPORU -->
+            <div class="space-y-2 border-t border-slate-800 pt-2.5">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tarih Aralıklı Kasa & Satış Raporu</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[9px] text-slate-400 mb-0.5">Başlangıç</label>
+                        <input type="date" id="kasaRaporBaslangic" onchange="updateKasaRaporPreview()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-[10px]">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] text-slate-400 mb-0.5">Bitiş</label>
+                        <input type="date" id="kasaRaporBitis" onchange="updateKasaRaporPreview()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-[10px]">
+                    </div>
+                </div>
+                <div class="bg-[#09141a] border border-slate-700/80 rounded-xl p-2.5 space-y-1.5" id="kasaRaporPreviewContent">
+                    <div class="text-center text-slate-500 py-2">Lütfen tarih aralığı seçin.</div>
+                </div>
+            </div>
+
+            <div class="space-y-2 border-t border-slate-800 pt-2.5">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tarih Aralıklı Cari Raporu</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><label class="block text-[9px] text-slate-400 mb-0.5">Başlangıç</label><input type="date" id="cariRaporBaslangic" onchange="updateCariPreview()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-[10px]"></div>
+                    <div><label class="block text-[9px] text-slate-400 mb-0.5">Bitiş</label><input type="date" id="cariRaporBitis" onchange="updateCariPreview()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-[10px]"></div>
+                </div>
+                <div class="bg-[#09141a] border border-slate-700/80 rounded-xl p-2.5 space-y-1.5">
+                    <div class="flex justify-between items-center text-[10px] font-bold text-emerald-400 border-b border-slate-800 pb-1">
+                        <span>Rapor Önizlemesi</span>
+                        <span id="previewToplamDurum" class="text-white">Toplam: 0,00 ₺</span>
+                    </div>
+                    <div id="cariRaporPreviewContent" class="max-h-32 overflow-y-auto space-y-1 text-[10px] text-slate-300">
+                        <div class="text-center text-slate-500 py-2">Kayıt bulunamadı.</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5 pt-1">
+                    <button onclick="shareCariOzetWhatsapp()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 p-2 rounded-xl flex flex-col items-center justify-center font-bold text-[10px] transition"><i data-lucide="message-square" class="w-4 h-4 mb-0.5 text-emerald-400"></i><span>WhatsApp</span></button>
+                    <button onclick="exportCariOzetExcel()" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 p-2 rounded-xl flex flex-col items-center justify-center font-bold text-[10px] transition"><i data-lucide="file-spreadsheet" class="w-4 h-4 mb-0.5 text-blue-400"></i><span>Excel İndir</span></button>
+                    <button onclick="exportCariOzetCsv()" class="bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 p-2 rounded-xl flex flex-col items-center justify-center font-bold text-[10px] transition"><i data-lucide="table" class="w-4 h-4 mb-0.5 text-amber-400"></i><span>CSV İndir</span></button>
+                </div>
+            </div>
+
+            <div class="space-y-1.5 border-t border-slate-800 pt-2.5">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tüm Veriler (Yedek Raporu)</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="exportToExcel()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 p-2 rounded-xl flex items-center justify-center space-x-1.5 font-bold text-xs transition"><i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i><span>Tüm Excel (.xlsx)</span></button>
+                    <button onclick="exportToCsv()" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 p-2 rounded-xl flex items-center justify-center space-x-1.5 font-bold text-xs transition"><i data-lucide="table" class="w-4 h-4 text-blue-400"></i><span>Tüm CSV İndir</span></button>
+                </div>
+            </div>
+
+            <div class="space-y-1.5 border-t border-slate-800 pt-2.5">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Uygulama Bilgisi</div>
+                <div class="bg-[#09141a] p-2.5 rounded-xl border border-slate-800 space-y-1 text-[11px]">
+                    <div class="flex justify-between items-center"><span class="text-slate-400">Uygulama:</span><span class="font-bold text-emerald-400">By METİN Cari & Kasa</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-400">Sürüm:</span><span class="font-semibold text-slate-200">v2.5 Pro Bulut</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-400">Kayıt:</span><span class="font-semibold text-slate-200" id="menuKayitSayisi">0 Kasa / 0 Cari</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARİ DETAY MODALI -->
+    <div id="cariDetailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
+        <div class="bg-[#11222b] border border-slate-700 rounded-xl shadow-2xl w-full max-w-sm p-3.5 space-y-3 text-slate-200 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <div>
+                    <h3 class="text-xs font-bold text-white" id="modalCariTitle">Firma Detayı</h3>
+                    <div class="text-[10px] text-slate-400">Bakiye Durumu: <span id="modalCariBakiye" class="font-bold maskable-amount">0,00 ₺</span></div>
+                </div>
+                <button onclick="closeCariDetail()" class="text-slate-400 hover:text-white text-base">✕</button>
+            </div>
+            <form id="cariHareketForm" onsubmit="handleCariHareketSubmit(event)" class="bg-[#09141a] p-2 rounded-lg space-y-1.5 text-xs border border-slate-800">
+                <div class="text-[10px] font-bold text-amber-400">Yeni Borç / Ödeme Ekle</div>
+                <input type="hidden" id="modalCariFirmaName">
+                <div class="grid grid-cols-2 gap-1.5">
+                    <select id="modalHareketTip" class="p-1.5 bg-[#11222b] border border-slate-700 rounded text-white text-[10px]">
+                        <option value="alis">Mal Alışı (Borç +)</option>
+                        <option value="odeme">Ödeme Yapıldı (Borç -)</option>
+                    </select>
+                    <input type="number" step="0.01" min="0.01" id="modalHareketTutar" placeholder="Tutar (₺)" required class="p-1.5 bg-[#11222b] border border-slate-700 rounded text-white text-[10px]">
+                </div>
+                <input type="text" id="modalHareketAciklama" placeholder="Açıklama / Belge no" class="w-full p-1.5 bg-[#11222b] border border-slate-700 rounded text-white text-[10px]">
+                <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-1 rounded text-[10px]">İşlemi Kaydet</button>
+            </form>
+            <div class="flex-1 overflow-y-auto space-y-1 border-t border-slate-800 pt-2">
+                <div class="text-[10px] font-semibold text-slate-300 mb-1">İşlem Geçmişi</div>
+                <div id="modalCariLogs" class="space-y-1"></div>
+            </div>
+            <button onclick="deleteEntireCari()" class="w-full bg-rose-600/20 text-rose-400 border border-rose-500/30 text-[10px] py-1.5 rounded font-semibold">Bu Cari Hesabı ve Tüm Geçmişini Sil</button>
+        </div>
+    </div>
+
+    <!-- KASA KAYDI DÜZENLEME MODALI -->
+    <div id="editKasaModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
+        <div class="bg-[#11222b] border border-slate-700 rounded-xl shadow-2xl w-full max-w-xs p-3 space-y-2 text-slate-200">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+                <h3 class="text-xs font-bold text-white">Gelir / Gider Kaydı Düzenle</h3>
+                <button onclick="closeEditKasaModal()" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <form id="editKasaForm" onsubmit="saveKasaEdit(event)" class="space-y-2 text-xs">
+                <input type="hidden" id="editKasaId">
+                <div><label class="block text-[10px] text-slate-300">Açıklama</label><input type="text" id="editKasaAciklama" required class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white"></div>
+                <div><label class="block text-[10px] text-slate-300">Nakit Tutar (₺)</label><input type="number" step="0.01" id="editKasaNakit" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white"></div>
+                <div><label class="block text-[10px] text-slate-300">Kredi Kartı Tutar (₺)</label><input type="number" step="0.01" id="editKasaKredi" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white"></div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 rounded text-xs">Değişiklikleri Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- AYARLAR & YEDEK MODALI -->
+    <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-[#11222b] border border-slate-700 rounded-xl shadow-2xl w-full max-w-sm p-4 space-y-3 text-slate-200 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 class="text-xs font-bold text-white">Ayarlar ve Sistem Tercihleri</h3>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-semibold text-emerald-400">Kullanıcı / İşletme Adı</label>
+                    <input type="text" id="settingUserName" placeholder="Örn: Metin Türk" onchange="updateProfileName()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-xs">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-semibold text-blue-400">Görünüm Teması</label>
+                    <select id="settingTheme" onchange="changeTheme()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-xs">
+                        <option value="dark">Koyu Tema (Dark Mode)</option>
+                        <option value="light">Açık Tema (Light Mode)</option>
+                    </select>
+                </div>
+                <div class="space-y-1 border-t border-slate-800 pt-2">
+                    <label class="block text-[10px] font-semibold text-amber-400">Otomatik Yedek Sıklığı (Dakika)</label>
+                    <input type="number" id="settingAutoBackupMinutes" min="0" placeholder="15" onchange="updateAutoBackupSetting()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-xs">
+                    <div class="text-[9px] text-slate-400" id="autoBackupStatusInfo">Dakika cinsinden süre girebilirsiniz.</div>
+                </div>
+                <div class="space-y-2 border-t border-slate-800 pt-2">
+                    <label class="block text-[10px] font-semibold text-emerald-400">📁 Dosya Olarak Yedekle (JSON)</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="exportToJsonFile()" class="w-full bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 p-2 rounded flex items-center justify-center font-medium border border-emerald-500/30"><i data-lucide="download" class="w-3.5 h-3.5 mr-1"></i> Dosya İndir</button>
+                        <label class="w-full bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 p-2 rounded flex items-center justify-center font-medium border border-blue-500/30 cursor-pointer"><i data-lucide="upload" class="w-3.5 h-3.5 mr-1"></i> Dosya Seç<input type="file" id="jsonFileInput" accept=".json" onchange="importFromJsonFile(event)" class="hidden"></label>
+                    </div>
+                </div>
+                <button onclick="clearAllDataWithConfirmation()" class="w-full bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 p-2 rounded flex items-center justify-center font-medium border border-rose-500/30 mt-2"><i data-lucide="trash-2" class="w-4 h-4 mr-1.5"></i> Tüm Verileri Sıfırla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        let appData = {
+            kasaLogs: [],
+            cariLogs: [],
+            settings: { userName: "Metin Türk", theme: "dark", autoBackupInterval: "15", isPrivate: false }
+        };
+        let summaryChart = null;
+        let selectedCariFirma = '';
+        let autoBackupTimer = null;
+        let sortField = 'tarih'; 
+        let sortDirection = 'desc'; 
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadLocalData();
+            document.getElementById('satisTarih').valueAsDate = new Date();
+            document.getElementById('odemeTarih').valueAsDate = new Date();
+            lucide.createIcons();
+            initChart();
+            applySettings();
+            renderAll();
+            startAutoBackupTimer();
+            
+            // Firebase yüklendiyse buluttan güncel verileri çek
+            setTimeout(() => {
+                if (window.loadFromCloud) window.loadFromCloud();
+            }, 600);
+        });
+
+        function loadLocalData() {
+            const saved = localStorage.getItem('by_metin_data_v6');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    appData = { ...appData, ...parsed };
+                    if(!appData.settings) appData.settings = { userName: "Metin Türk", theme: "dark", autoBackupInterval: "15", isPrivate: false };
+                } catch (e) {}
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('by_metin_data_v6', JSON.stringify(appData));
+            renderAll();
+            if (window.saveToCloud) {
+                window.saveToCloud(appData);
+            }
+        }
+
+        function applySettings() {
+            document.getElementById('headerTitle').innerText = appData.settings.userName.split(' ')[0].toUpperCase() || "METİN";
+            document.getElementById('headerSubTitle').innerText = appData.settings.userName || "Metin Türk";
+            document.getElementById('menuUserName').innerText = appData.settings.userName || "Metin Türk";
+            document.getElementById('settingUserName').value = appData.settings.userName || "Metin Türk";
+            const body = document.getElementById('appBody');
+            if (appData.settings.theme === 'light') {
+                body.classList.remove('dark-mode'); body.classList.add('light-mode');
+            } else {
+                body.classList.remove('light-mode'); body.classList.add('dark-mode');
+            }
+            document.getElementById('settingTheme').value = appData.settings.theme || 'dark';
+            document.getElementById('settingAutoBackupMinutes').value = appData.settings.autoBackupInterval || '15';
+            updatePrivacyUI();
+        }
+
+        function togglePrivacy() {
+            appData.settings.isPrivate = !appData.settings.isPrivate;
+            saveData();
+            updatePrivacyUI();
+        }
+
+        function updatePrivacyUI() {
+            const isPrivate = appData.settings.isPrivate;
+            const privacyBtn = document.getElementById('privacyBtn');
+            privacyBtn.innerHTML = isPrivate ? '<i data-lucide="eye-off" class="w-4 h-4 text-rose-400"></i>' : '<i data-lucide="eye" class="w-4 h-4 text-emerald-400"></i>';
+            document.querySelectorAll('.maskable-amount').forEach(el => {
+                if (isPrivate) {
+                    el.dataset.original = el.dataset.original || el.innerText;
+                    el.innerText = "*** ₺";
+                } else {
+                    if (el.dataset.original) el.innerText = el.dataset.original;
+                }
+            });
+            lucide.createIcons();
+        }
+
+        function updateProfileName() {
+            const val = document.getElementById('settingUserName').value.trim();
+            if (val) { appData.settings.userName = val; saveData(); applySettings(); }
+        }
+
+        function changeTheme() {
+            appData.settings.theme = document.getElementById('settingTheme').value;
+            saveData(); applySettings();
+        }
+
+        function updateAutoBackupSetting() {
+            appData.settings.autoBackupInterval = document.getElementById('settingAutoBackupMinutes').value;
+            saveData(); startAutoBackupTimer();
+        }
+
+        function startAutoBackupTimer() {
+            if (autoBackupTimer) clearInterval(autoBackupTimer);
+            const intervalMinutes = parseInt(appData.settings.autoBackupInterval);
+            const infoEl = document.getElementById('autoBackupStatusInfo');
+            if (intervalMinutes > 0) {
+                infoEl.innerText = 'Otomatik yedek aktif: Her ' + intervalMinutes + ' dakikada bir kaydedilir.';
+                autoBackupTimer = setInterval(() => { localStorage.setItem('by_metin_auto_backup', JSON.stringify(appData)); }, intervalMinutes * 60 * 1000);
+            } else { infoEl.innerText = "Otomatik yedekleme kapalı."; }
+        }
+
+        function openMenuModal() {
+            calculateCiroSummary();
+            updateCariPreview();
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+            if(!document.getElementById('kasaRaporBaslangic').value) {
+                document.getElementById('kasaRaporBaslangic').value = todayStr;
+            }
+            if(!document.getElementById('kasaRaporBitis').value) {
+                document.getElementById('kasaRaporBitis').value = todayStr;
+            }
+            updateKasaRaporPreview();
+
+            document.getElementById('menuKayitSayisi').innerText = appData.kasaLogs.length + ' Kasa / ' + appData.cariLogs.length + ' Cari';
+            document.getElementById('menuModal').classList.remove('hidden');
+            document.getElementById('menuModal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeMenuModal() {
+            document.getElementById('menuModal').classList.add('hidden');
+            document.getElementById('menuModal').classList.remove('flex');
+        }
+
+        function calculateCiroSummary() {
+            const today = new Date().toISOString().split('T')[0];
+            const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(new Date().getDate() - 6);
+            const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+            let bugunNakit = 0, bugunKredi = 0, haftaNakit = 0, haftaKredi = 0;
+            appData.kasaLogs.forEach(log => {
+                if (log.tip === 'satis') {
+                    if (log.tarih === today) { bugunNakit += (log.nakit || 0); bugunKredi += (log.kredi || 0); }
+                    if (log.tarih >= sevenDaysAgoStr && log.tarih <= today) { haftaNakit += (log.nakit || 0); haftaKredi += (log.kredi || 0); }
+                }
+            });
+            setMaskableText('menuBugunCiro', (bugunNakit + bugunKredi).toFixed(2) + ' ₺');
+            document.getElementById('menuBugunDetay').innerText = 'Nakit: ' + bugunNakit.toFixed(0) + '₺ | Kredi: ' + bugunKredi.toFixed(0) + '₺';
+            setMaskableText('menuHaftalikCiro', (haftaNakit + haftaKredi).toFixed(2) + ' ₺');
+            document.getElementById('menuHaftalikDetay').innerText = 'Nakit: ' + haftaNakit.toFixed(0) + '₺ | Kredi: ' + haftaKredi.toFixed(0) + '₺';
+            updatePrivacyUI();
+        }
+
+        function updateKasaRaporPreview() {
+            const baslangic = document.getElementById('kasaRaporBaslangic').value;
+            const bitis = document.getElementById('kasaRaporBitis').value;
+            const contentEl = document.getElementById('kasaRaporPreviewContent');
+            
+            if (!baslangic || !bitis) {
+                contentEl.innerHTML = '<div class="text-center text-slate-500 py-2">Lütfen başlangıç ve bitiş tarihi seçin.</div>';
+                return;
+            }
+
+            const d1 = new Date(baslangic);
+            const d2 = new Date(bitis);
+            if (d1 > d2) {
+                contentEl.innerHTML = '<div class="text-center text-rose-400 py-2">Başlangıç tarihi bitiş tarihinden büyük olamaz.</div>';
+                return;
+            }
+
+            const diffTime = Math.abs(d2 - d1);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+            let nakitSatis = 0, kartSatis = 0;
+            let nakitOdeme = 0, kartOdeme = 0;
+
+            appData.kasaLogs.forEach(log => {
+                if (log.tarih >= baslangic && log.tarih <= bitis) {
+                    if (log.tip === 'satis') {
+                        nakitSatis += (log.nakit || 0);
+                        kartSatis += (log.kredi || 0);
+                    } else if (log.tip === 'odeme') {
+                        nakitOdeme += (log.nakit || 0);
+                        kartOdeme += (log.kredi || 0);
+                    }
+                }
+            });
+
+            contentEl.innerHTML = `
+                <div class="space-y-1.5 text-[11px]">
+                    <div class="flex justify-between items-center bg-[#11222b] px-2 py-1.5 rounded border border-slate-800">
+                        <span class="text-slate-400 font-semibold">Seçili Gün Aralığı:</span>
+                        <span class="font-extrabold text-amber-400 text-xs">${diffDays} Gün</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <div class="bg-[#11222b] p-2 rounded border border-slate-800">
+                            <div class="text-[9px] text-emerald-400 font-semibold">NAKİT SATIŞ</div>
+                            <div class="text-xs font-bold text-white maskable-amount">${nakitSatis.toFixed(2)} ₺</div>
+                        </div>
+                        <div class="bg-[#11222b] p-2 rounded border border-slate-800">
+                            <div class="text-[9px] text-blue-400 font-semibold">KART / KREDİ SATIŞ</div>
+                            <div class="text-xs font-bold text-white maskable-amount">${kartSatis.toFixed(2)} ₺</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <div class="bg-[#11222b] p-2 rounded border border-slate-800">
+                            <div class="text-[9px] text-rose-400 font-semibold">NAKİT ÖDEME</div>
+                            <div class="text-xs font-bold text-white maskable-amount">${nakitOdeme.toFixed(2)} ₺</div>
+                        </div>
+                        <div class="bg-[#11222b] p-2 rounded border border-slate-800">
+                            <div class="text-[9px] text-rose-400 font-semibold">KART / KREDİ ÖDEME</div>
+                            <div class="text-xs font-bold text-white maskable-amount">${kartOdeme.toFixed(2)} ₺</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            updatePrivacyUI();
+        }
+
+        function getFilteredCariBalances() {
+            const baslangic = document.getElementById('cariRaporBaslangic').value;
+            const bitis = document.getElementById('cariRaporBitis').value;
+            let cariBakiyeler = {};
+            appData.cariLogs.forEach(log => {
+                if (baslangic && log.tarih < baslangic) return;
+                if (bitis && log.tarih > bitis) return;
+                if(!cariBakiyeler[log.firma]) cariBakiyeler[log.firma] = 0;
+                if(log.tip === 'alis') cariBakiyeler[log.firma] -= log.tutar;
+                else if(log.tip === 'odeme') cariBakiyeler[log.firma] += log.tutar;
+            });
+            return cariBakiyeler;
+        }
+
+        function updateCariPreview() {
+            const cariBakiyeler = getFilteredCariBalances();
+            const firmalar = Object.keys(cariBakiyeler);
+            const previewContainer = document.getElementById('cariRaporPreviewContent');
+            const previewToplamDurum = document.getElementById('previewToplamDurum');
+            previewContainer.innerHTML = '';
+            let toplamBorcAlacak = 0;
+            if (firmalar.length === 0) {
+                previewContainer.innerHTML = '<div class="text-center text-slate-500 py-3">Bu tarih aralığında cari işlem bulunamadı.</div>';
+                previewToplamDurum.innerText = 'Toplam: 0,00 ₺';
+                return;
+            }
+            firmalar.forEach(firma => {
+                const bakiye = cariBakiyeler[firma];
+                toplamBorcAlacak += bakiye;
+                const row = document.createElement('div');
+                row.className = 'flex justify-between items-center bg-[#11222b] px-2 py-1 rounded border border-slate-800';
+                row.innerHTML = '<span class="font-medium text-slate-200">' + firma + '</span><span class="font-bold ' + (bakiye < 0 ? 'text-rose-400' : 'text-emerald-400') + '">' + bakiye.toFixed(2) + ' ₺</span>';
+                previewContainer.appendChild(row);
+            });
+            previewToplamDurum.innerText = 'Toplam: ' + toplamBorcAlacak.toFixed(2) + ' ₺';
+            updatePrivacyUI();
+        }
+
+        function shareCariOzetWhatsapp() {
+            const cariBakiyeler = getFilteredCariBalances();
+            const firmalar = Object.keys(cariBakiyeler);
+            if (firmalar.length === 0) { alert("Kayıtlı cari işlem bulunmuyor."); return; }
+            let detayListesi = "", toplam = 0;
+            firmalar.forEach((f, i) => {
+                const b = cariBakiyeler[f]; toplam += b;
+                detayListesi += (i + 1) + ". *" + f + "*: " + b.toFixed(2) + " ₺\n";
+            });
+            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent("📋 *CARİ ÖZETİ*\n" + detayListesi + "\nToplam: " + toplam.toFixed(2) + " ₺"), '_blank');
+        }
+
+        function exportCariOzetExcel() {
+            if (typeof XLSX === 'undefined') { alert("Excel modülü yüklenemedi."); return; }
+            const wb = XLSX.utils.book_new();
+            const rows = appData.cariLogs.map(c => ({ "Tarih": c.tarih, "Firma": c.firma, "Tip": c.tip, "Tutar": c.tutar, "Açıklama": c.aciklama }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Cari Raporu");
+            XLSX.writeFile(wb, "Cari_Raporu.xlsx");
+        }
+
+        function exportCariOzetCsv() {
+            let csv = "\uFEFFTarih;Firma;Tip;Tutar;Açıklama\n";
+            appData.cariLogs.forEach(c => { csv += c.tarih + ";" + c.firma + ";" + c.tip + ";" + c.tutar + ";" + c.aciklama + "\n"; });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = "Cari_Rapor.csv"; a.click();
+        }
+
+        function exportToExcel() {
+            if (typeof XLSX === 'undefined') return;
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData.kasaLogs), "Kasa");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData.cariLogs), "Cari");
+            XLSX.writeFile(wb, "Tum_Veriler.xlsx");
+        }
+
+        function exportToCsv() {
+            let csv = "\uFEFFTip;Tarih;Açıklama;Tutar\n";
+            appData.kasaLogs.forEach(l => { csv += "Kasa;" + l.tarih + ";" + l.aciklama + ";" + ((l.nakit||0)+(l.kredi||0)) + "\n"; });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = "Tum_Veriler.csv"; a.click();
+        }
+
+        function exportToJsonFile() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
+            const a = document.createElement('a'); a.href = dataStr; a.download = "yedek.json"; a.click();
+        }
+
+        function importFromJsonFile(e) {
+            const reader = new FileReader();
+            if (e.target.files[0]) {
+                reader.readAsText(e.target.files[0], "UTF-8");
+                reader.onload = (event) => {
+                    try { appData = JSON.parse(event.target.result); saveData(); applySettings(); alert("Yüklendi!"); closeSettings(); } catch(err) { alert("Hata!"); }
+                };
+            }
+        }
+
+        function clearAllDataWithConfirmation() {
+            if (confirm("Tüm veriler silinsin mi?")) { appData = { kasaLogs: [], cariLogs: [], settings: appData.settings }; saveData(); closeSettings(); }
+        }
+
+        function switchView(viewId) {
+            ['islemler', 'gelir', 'gider', 'notlar', 'cariEkle'].forEach(id => {
+                document.getElementById('view-' + id).classList.add('hidden');
+            });
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => { btn.classList.remove('text-emerald-400', 'font-extrabold', 'bg-slate-800/50'); btn.classList.add('text-slate-300'); });
+            const navBtn = document.getElementById('nav-' + viewId);
+            if(navBtn) { navBtn.classList.remove('text-slate-300'); navBtn.classList.add('text-emerald-400', 'font-extrabold', 'bg-slate-800/50'); }
+            if(viewId === 'gider') populateCariDropdown();
+            lucide.createIcons();
+        }
+
+        function populateCariDropdown() {
+            const select = document.getElementById('odemeCariSelect');
+            select.innerHTML = '<option value="__HARICI__">-- Cari Seçin --</option>';
+            [...new Set(appData.cariLogs.map(l => l.firma))].forEach(name => {
+                const opt = document.createElement('option'); opt.value = name; opt.innerText = 'Cari: ' + name; select.appendChild(opt);
+            });
+            toggleHariciGiderInput();
+        }
+
+        function toggleHariciGiderInput() {
+            const select = document.getElementById('odemeCariSelect'), firmaInput = document.getElementById('odemeFirma');
+            if (select.value === '__HARICI__') { firmaInput.value = ''; firmaInput.readOnly = false; firmaInput.placeholder = "Örn: Elektrik Faturası"; }
+            else { firmaInput.value = select.value; firmaInput.readOnly = true; }
+        }
+
+        function handleSatisSubmit(e) {
+            e.preventDefault();
+            const tarih = document.getElementById('satisTarih').value;
+            const nakit = parseFloat(document.getElementById('satisNakit').value) || 0;
+            const kredi = parseFloat(document.getElementById('satisKredi').value) || 0;
+            if (nakit <= 0 && kredi <= 0) { alert("Tutar giriniz."); return; }
+            appData.kasaLogs.push({ id: Date.now(), tarih, tip: 'satis', aciklama: 'Günlük Satış', nakit, kredi });
+            document.getElementById('satisNakit').value = ''; document.getElementById('satisKredi').value = '';
+            saveData(); switchView('notlar');
+        }
+
+        function handleOdemeSubmit(e) {
+            e.preventDefault();
+            const tarih = document.getElementById('odemeTarih').value;
+            const selectedCari = document.getElementById('odemeCariSelect').value;
+            const firma = document.getElementById('odemeFirma').value.trim();
+            const tutar = parseFloat(document.getElementById('odemeTutar').value) || 0;
+            const odemeTur = document.getElementById('odemeTur').value;
+            if (!firma || tutar <= 0) return;
+            appData.kasaLogs.push({ id: Date.now(), tarih, tip: 'odeme', aciklama: 'Gider: ' + firma + ' (' + odemeTur + ')', nakit: odemeTur === 'Nakit' ? tutar : 0, kredi: odemeTur === 'Kredi Kartı' ? tutar : 0 });
+            if (selectedCari !== '__HARICI__') { appData.cariLogs.push({ id: Date.now() + 1, tarih, firma: selectedCari, tip: 'odeme', tutar, aciklama: 'Ödeme (' + odemeTur + ')' }); }
+            document.getElementById('odemeFirma').value = ''; document.getElementById('odemeTutar').value = '';
+            saveData(); switchView('notlar');
+        }
+
+        function handleCariSubmit(e) {
+            e.preventDefault();
+            const firma = document.getElementById('cariFirma').value.trim();
+            const tip = document.getElementById('cariIslemTip').value;
+            const tutar = parseFloat(document.getElementById('cariTutar').value) || 0;
+            const aciklama = document.getElementById('cariAciklama').value.trim() || 'Açılış';
+            if (!firma) return;
+            appData.cariLogs.push({ id: Date.now(), tarih: new Date().toISOString().split('T')[0], firma, tip, tutar, aciklama });
+            document.getElementById('cariFirma').value = ''; document.getElementById('cariTutar').value = ''; document.getElementById('cariAciklama').value = '';
+            saveData(); switchView('islemler');
+        }
+
+        function openCariDetail(firmaName) {
+            selectedCariFirma = firmaName;
+            document.getElementById('modalCariTitle').innerText = firmaName;
+            document.getElementById('modalCariFirmaName').value = firmaName;
+            renderCariModalLogs();
+            document.getElementById('cariDetailModal').classList.remove('hidden');
+            document.getElementById('cariDetailModal').classList.add('flex');
+        }
+
+        function closeCariDetail() {
+            document.getElementById('cariDetailModal').classList.add('hidden');
+            document.getElementById('cariDetailModal').classList.remove('flex');
+        }
+
+        function renderCariModalLogs() {
+            const logsContainer = document.getElementById('modalCariLogs');
+            logsContainer.innerHTML = '';
+            let bakiye = 0;
+            appData.cariLogs.filter(l => l.firma === selectedCariFirma).forEach(log => {
+                if(log.tip === 'alis') bakiye -= log.tutar; else if(log.tip === 'odeme') bakiye += log.tutar;
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center bg-[#09141a] p-1.5 rounded border border-slate-800 text-[10px]";
+                item.innerHTML = '<div><div class="text-slate-200 font-medium">' + log.aciklama + '</div><div class="text-slate-400">' + log.tarih + '</div></div><div class="flex items-center space-x-2"><span class="font-bold ' + (log.tip === 'alis' ? 'text-rose-400' : 'text-emerald-400') + '">' + log.tutar.toFixed(2) + ' ₺</span><button onclick="deleteSingleCariLog(' + log.id + ')" class="text-rose-500">✕</button></div>';
+                logsContainer.appendChild(item);
+            });
+            const bEl = document.getElementById('modalCariBakiye');
+            bEl.innerText = bakiye.toFixed(2) + ' ₺'; bEl.className = 'font-bold maskable-amount ' + (bakiye < 0 ? 'text-rose-400' : 'text-emerald-400');
+            updatePrivacyUI();
+        }
+
+        function handleCariHareketSubmit(e) {
+            e.preventDefault();
+            const tip = document.getElementById('modalHareketTip').value;
+            const tutar = parseFloat(document.getElementById('modalHareketTutar').value) || 0;
+            const aciklama = document.getElementById('modalHareketAciklama').value.trim() || (tip === 'alis' ? 'Mal Alışı' : 'Ödeme');
+            if(tutar <= 0) return;
+            appData.cariLogs.push({ id: Date.now(), tarih: new Date().toISOString().split('T')[0], firma: selectedCariFirma, tip, tutar, aciklama });
+            if(tip === 'odeme') { appData.kasaLogs.push({ id: Date.now() + 1, tarih: new Date().toISOString().split('T')[0], tip: 'odeme', aciklama: 'Cari Ödeme: ' + selectedCariFirma, nakit: tutar, kredi: 0 }); }
+            document.getElementById('modalHareketTutar').value = ''; document.getElementById('modalHareketAciklama').value = '';
+            saveData(); renderCariModalLogs();
+        }
+
+        function deleteSingleCariLog(id) {
+            if (confirm("Silinsin mi?")) { appData.cariLogs = appData.cariLogs.filter(l => l.id !== id); saveData(); renderCariModalLogs(); }
+        }
+
+        function deleteEntireCari() {
+            if(confirm("Tüm cari silinsin mi?")) { appData.cariLogs = appData.cariLogs.filter(l => l.firma !== selectedCariFirma); saveData(); closeCariDetail(); }
+        }
+
+        function openEditKasaModal(id) {
+            const log = appData.kasaLogs.find(l => l.id === id);
+            if (!log) return;
+            document.getElementById('editKasaId').value = log.id;
+            document.getElementById('editKasaAciklama').value = log.aciklama;
+            document.getElementById('editKasaNakit').value = log.nakit || 0;
+            document.getElementById('editKasaKredi').value = log.kredi || 0;
+            document.getElementById('editKasaModal').classList.remove('hidden');
+            document.getElementById('editKasaModal').classList.add('flex');
+        }
+
+        function closeEditKasaModal() {
+            document.getElementById('editKasaModal').classList.add('hidden');
+            document.getElementById('editKasaModal').classList.remove('flex');
+        }
+
+        function saveKasaEdit(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('editKasaId').value);
+            const log = appData.kasaLogs.find(l => l.id === id);
+            if (log) {
+                log.aciklama = document.getElementById('editKasaAciklama').value;
+                log.nakit = parseFloat(document.getElementById('editKasaNakit').value) || 0;
+                log.kredi = parseFloat(document.getElementById('editKasaKredi').value) || 0;
+                saveData(); closeEditKasaModal();
+            }
+        }
+
+        function deleteKasaLog(id) {
+            if (confirm("Silinsin mi?")) { appData.kasaLogs = appData.kasaLogs.filter(item => item.id !== id); saveData(); }
+        }
+
+        function deleteCariLogFromMaster(id) {
+            if (confirm("Silinsin mi?")) { appData.cariLogs = appData.cariLogs.filter(item => item.id !== id); saveData(); }
+        }
+
+        function toggleSort(field) {
+            sortDirection = (sortField === field && sortDirection === 'asc') ? 'desc' : 'asc';
+            sortField = field;
+            renderAll();
+        }
+
+        function renderAll() {
+            let nGelir = 0, kGelir = 0, nGider = 0, kGider = 0;
+            appData.kasaLogs.forEach(log => {
+                if (log.tip === 'satis') { nGelir += (log.nakit || 0); kGelir += (log.kredi || 0); }
+                else if (log.tip === 'odeme') { nGider += (log.nakit || 0); kGider += (log.kredi || 0); }
+            });
+            const toplamGider = nGider + kGider, toplamGelir = nGelir + kGelir;
+            setMaskableText('toplamAyBakiye', (toplamGelir - toplamGider).toFixed(2) + ' ₺');
+            setMaskableText('nakitKalan', (nGelir - nGider).toFixed(2) + ' ₺');
+            setMaskableText('krediKalan', (kGelir - kGider).toFixed(2) + ' ₺');
+            setMaskableText('toplamNakitGelir', nGelir.toFixed(2) + ' ₺');
+            setMaskableText('toplamKrediGelir', kGelir.toFixed(2) + ' ₺');
+            setMaskableText('toplamGiderOzet', toplamGider.toFixed(2) + ' ₺');
+
+            let cariBakiyeler = {};
+            appData.cariLogs.forEach(log => {
+                if(!cariBakiyeler[log.firma]) cariBakiyeler[log.firma] = 0;
+                if(log.tip === 'alis') cariBakiyeler[log.firma] -= log.tutar; else if(log.tip === 'odeme') cariBakiyeler[log.firma] += log.tutar;
+            });
+            const cariListEl = document.getElementById('cariHesaplarListesi');
+            cariListEl.innerHTML = '';
+            const firmalar = Object.keys(cariBakiyeler);
+            if(firmalar.length === 0) {
+                cariListEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs font-medium">Kayıtlı cari firma yok.<br>Üstteki "Yeni Cari" butonundan ekleyebilirsiniz.</div>';
+            } else {
+                firmalar.forEach(firma => {
+                    const bakiye = cariBakiyeler[firma];
+                    const div = document.createElement('div');
+                    div.className = "flex justify-between items-center bg-[#11222b] hover:bg-[#162a35] cursor-pointer px-3 py-2.5 rounded-lg border border-slate-700 shadow-sm transition";
+                    div.onclick = () => openCariDetail(firma);
+                    div.innerHTML = '<div class="flex items-center space-x-2"><i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i><span class="text-xs font-bold text-slate-100">' + firma + '</span></div><span class="text-xs font-bold ' + (bakiye < 0 ? 'text-rose-400' : 'text-emerald-400') + '">' + bakiye.toFixed(2) + ' ₺</span>';
+                    cariListEl.appendChild(div);
+                });
+            }
+
+            document.getElementById('sortIconTarih').innerText = sortField === 'tarih' ? (sortDirection === 'asc' ? ' ▲' : ' ▼') : '';
+            document.getElementById('sortIconTutar').innerText = sortField === 'tutar' ? (sortDirection === 'asc' ? ' ▲' : ' ▼') : '';
+
+            let unifiedLogs = [];
+            appData.kasaLogs.forEach(l => {
+                unifiedLogs.push({ id: 'kasa_' + l.id, originalId: l.id, source: 'kasa', tarih: l.tarih, tip: l.tip, baslik: l.aciklama, nakit: l.nakit || 0, kredi: l.kredi || 0, tutar: (l.nakit || 0) + (l.kredi || 0) });
+            });
+            appData.cariLogs.forEach(c => {
+                unifiedLogs.push({ id: 'cari_' + c.id, originalId: c.id, source: 'cari', tarih: c.tarih, tip: c.tip, baslik: c.firma + ' — ' + (c.aciklama || (c.tip === 'alis' ? 'Mal Alışı' : 'Ödeme')), nakit: 0, kredi: 0, tutar: c.tutar || 0 });
+            });
+
+            const wpBaslangic = document.getElementById('wpBaslangicTarih').value;
+            const wpBitis = document.getElementById('wpBitisTarih').value;
+            if (wpBaslangic) unifiedLogs = unifiedLogs.filter(i => i.tarih >= wpBaslangic);
+            if (wpBitis) unifiedLogs = unifiedLogs.filter(i => i.tarih <= wpBitis);
+
+            unifiedLogs.sort((a, b) => {
+                if (sortField === 'tarih') { let comp = a.tarih.localeCompare(b.tarih); return sortDirection === 'asc' ? comp : -comp; }
+                else { return sortDirection === 'asc' ? a.tutar - b.tutar : b.tutar - a.tutar; }
+            });
+
+            const kasaBody = document.getElementById('kasaLogTable');
+            kasaBody.innerHTML = '';
+            if (unifiedLogs.length === 0) {
+                kasaBody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400">Kayıt bulunamadı.</td></tr>';
+            } else {
+                unifiedLogs.forEach(log => {
+                    const tr = document.createElement('tr');
+                    let badge = '';
+                    if (log.source === 'kasa') {
+                        if (log.tip === 'satis') {
+                            badge = `
+                                <div class="font-semibold text-slate-100 mb-1">Günlük Satış Girişi</div>
+                                <div class="flex items-center space-x-1.5 text-[10px]">
+                                    <span class="px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/50">Nakit (${log.nakit.toFixed(2)}₺)</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800/50">Kredi (${log.kredi.toFixed(2)}₺)</span>
+                                </div>
+                            `;
+                        } else {
+                            badge = `<div class="font-semibold text-slate-100">${log.baslik}</div><div class="mt-0.5"><span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-950 text-rose-400">Kasa Gider</span></div>`;
+                        }
+                    } else {
+                        badge = `<div class="font-semibold text-slate-100">${log.baslik}</div><div class="mt-0.5">` + (log.tip === 'alis' ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-400">Cari Mal Alışı</span>' : '<span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-950 text-blue-400">Cari Ödeme</span>') + `</div>`;
+                    }
+
+                    let islemSign = (log.source === 'kasa' && log.tip === 'satis') || (log.source === 'cari' && log.tip === 'alis') ? '+' : '-';
+                    let tClass = islemSign === '+' ? 'text-emerald-400' : 'text-rose-400';
+                    tr.innerHTML = '<td class="text-slate-300 text-[10px] align-top">' + log.tarih + '</td><td class="align-top">' + badge + '</td><td class="text-right font-semibold ' + tClass + ' align-top">' + islemSign + log.tutar.toFixed(2) + ' ₺</td><td class="text-center align-top space-x-1">' + (log.source === 'kasa' ? '<button onclick="openEditKasaModal(' + log.originalId + ')" class="text-blue-400"><i data-lucide="edit-2" class="w-3 h-3"></i></button><button onclick="deleteKasaLog(' + log.originalId + ')" class="text-rose-400"><i data-lucide="trash-2" class="w-3 h-3"></i></button>' : '<button onclick="deleteCariLogFromMaster(' + log.originalId + ')" class="text-rose-400"><i data-lucide="trash-2" class="w-3 h-3"></i></button>') + '</td>';
+                    kasaBody.appendChild(tr);
+                });
+            }
+            updatePrivacyUI(); lucide.createIcons();
+            if (summaryChart) { summaryChart.data.datasets[0].data = [nGelir, kGelir, toplamGider]; summaryChart.update(); }
+        }
+
+        function setMaskableText(id, text) {
+            const el = document.getElementById(id);
+            if (el) { el.dataset.original = text; if(!appData.settings.isPrivate) el.innerText = text; }
+        }
+
+        function initChart() {
+            summaryChart = new Chart(document.getElementById('miniSummaryChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: ['Nakit', 'Kredi', 'Gider'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#10b981', '#3b82f6', '#f43f5e'], borderRadius: 3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 8 }, color: '#cbd5e1' }, grid: { display: false } }, y: { ticks: { font: { size: 8 }, color: '#cbd5e1' }, grid: { color: '#1e293b' } } } }
+            });
+        }
+
+        function shareCarilerWhatsapp() {
+            let cariB = {};
+            appData.cariLogs.forEach(l => { if(!cariB[l.firma]) cariB[l.firma] = 0; if(l.tip === 'alis') cariB[l.firma] -= l.tutar; else cariB[l.firma] += l.tutar; });
+            const firmalar = Object.keys(cariB);
+            if (firmalar.length === 0) { alert("Cari firma yok."); return; }
+            let text = "📋 *CARİ ÖZETİ*\n"; firmalar.forEach(f => text += "*" + f + "*: " + cariB[f].toFixed(2) + " ₺\n");
+            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text), '_blank');
+        }
+
+        function shareKasaWhatsapp() {
+            let text = "📊 *TÜM HAREKETLER GÜNLÜĞÜ*\n";
+            appData.kasaLogs.forEach(l => text += "[" + l.tarih + "] " + l.aciklama + ": " + ((l.nakit||0)+(l.kredi||0)).toFixed(2) + " ₺\n");
+            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text), '_blank');
+        }
+
+        function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); document.getElementById('settingsModal').classList.add('flex'); }
+        function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); document.getElementById('settingsModal').classList.remove('flex'); }
+    </script>
+
+    <!-- FIREBASE BULUT VERITABANI ENTEGRASYONU -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-analytics.js";
+      import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyC0HkBPDgkPI5PzLcSTKKwASVnGWpo7T5c",
+        authDomain: "hesap-v3.firebaseapp.com",
+        projectId: "hesap-v3",
+        storageBucket: "hesap-v3.firebasestorage.app",
+        messagingSenderId: "797830161443",
+        appId: "1:797830161443:web:dc24967baa0bc40d23fd96",
+        measurementId: "G-K1DPRTVRDH"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getFirestore(app);
+      const docRef = doc(db, "uygulama_verileri", "hesap_v3_ana_veri");
+
+      function updateCloudBadge(status, text) {
+          const badge = document.getElementById("cloudStatusBadge");
+          if (!badge) return;
+          if (status === "ok") {
+              badge.innerText = "☁️ Bağlı";
+              badge.className = "text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-700/50";
+          } else if (status === "saving") {
+              badge.innerText = "☁️ Kaydediliyor...";
+              badge.className = "text-[10px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-700/50";
+          } else {
+              badge.innerText = "☁️ Çevrimdışı";
+              badge.className = "text-[10px] px-1.5 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-700/50";
+          }
+      }
+
+      // Buluta kaydetme fonksiyonu
+      window.saveToCloud = async function(data) {
+          try {
+              updateCloudBadge("saving");
+              await setDoc(docRef, data);
+              updateCloudBadge("ok");
+          } catch (error) {
+              console.error("Buluta kaydetme hatası:", error);
+              updateCloudBadge("err");
+          }
+      };
+
+      // Buluttan veri yükleme fonksiyonu
+      window.loadFromCloud = async function() {
+          try {
+              const docSnap = await getDoc(docRef);
+              if (docSnap.exists()) {
+                  const cloudData = docSnap.data();
+                  appData = { ...appData, ...cloudData };
+                  localStorage.setItem('by_metin_data_v6', JSON.stringify(appData));
+                  applySettings();
+                  renderAll();
+              } else {
+                  // İlk açılışta bulutta veri yoksa mevcut yerel veriyi buluta gönder
+                  await window.saveToCloud(appData);
+              }
+              updateCloudBadge("ok");
+          } catch (error) {
+              console.error("Buluttan okuma hatası:", error);
+              updateCloudBadge("err");
+          }
+      };
+
+      // Sayfa açılır açılmaz bulutla eşitle
+      window.loadFromCloud();
+    </script>
+</body>
+</html>
