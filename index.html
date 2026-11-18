@@ -35,12 +35,15 @@
                 <label for="rememberMeCheck" style="color:#cbd5e1;font-size:11px;cursor:pointer;">Beni Hatırla (Bir daha sorma)</label>
             </div>
             <button onclick="checkAppLogin()" style="width:100%;background:#10b981;color:#fff;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">Giriş Yap</button>
-            <div id="loginErrorMsg" style="color:#f43f5e;font-size:10px;margin-top:10px;display:none;">Hatalı şifre!</div>
+            <div id="loginErrorMsg" style="color:#f43f5e;font-size:10px;margin-top:10px;display:none;">Hatalı şifre! (Admin: m3444)</div>
         </div>
     </div>
 
     <script>
-        let savedSettings = JSON.parse(localStorage.getItem('by_metin_data_v6'))?.settings || {};
+        let DATA_VERSION = 'v9';
+        let savedData = JSON.parse(localStorage.getItem('by_metin_data_' + DATA_VERSION)) || {};
+        let savedSettings = savedData.settings || {};
+        
         let securityEnabled = savedSettings.securityEnabled !== undefined ? savedSettings.securityEnabled : true;
         let adminPwd = savedSettings.adminPwd || "m3444";
         let readonlyPwd = savedSettings.readonlyPwd || "3444";
@@ -94,15 +97,6 @@
         </header>
 
         <div class="content-area p-3 space-y-2.5">
-            <!-- İNTERNET BAĞLANTI DURUM GÖSTERGESİ -->
-            <div id="connectionStatusBar" class="bg-[#11222b] px-3 py-1.5 rounded-2xl border border-slate-800 flex justify-between items-center text-[10px] shadow-sm">
-                <div class="flex items-center space-x-2">
-                    <span id="connDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span id="connText" class="font-semibold text-emerald-400">Bağlı (Çevrimiçi)</span>
-                </div>
-                <span class="text-slate-400 font-medium">GitHub Pages</span>
-            </div>
-
             <!-- GENEL ÖZET KARTI -->
             <div class="card-bg p-3 rounded-2xl border border-slate-800 shadow-xl space-y-2.5 bg-[#11222b]">
                 <div class="flex justify-between items-start border-b border-slate-800/80 pb-2">
@@ -408,7 +402,7 @@
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Uygulama Bilgisi</div>
                 <div class="bg-[#09141a] p-2.5 rounded-2xl border border-slate-800 space-y-1 text-[11px]">
                     <div class="flex justify-between items-center"><span class="text-slate-400">Uygulama:</span><span class="font-bold text-emerald-400">By METİN Cari & Kasa</span></div>
-                    <div class="flex justify-between items-center"><span class="text-slate-400">Sürüm:</span><span class="font-semibold text-slate-200">v2.5 Pro Mobil</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-400">Sürüm:</span><span class="font-semibold text-slate-200">v2.9 Pro Mobil</span></div>
                     <div class="flex justify-between items-center"><span class="text-slate-400">Kayıt:</span><span class="font-semibold text-slate-200" id="menuKayitSayisi">0 Kasa / 0 Cari</span></div>
                 </div>
             </div>
@@ -529,8 +523,8 @@
                 autoBackupInterval: "15", 
                 isPrivate: false,
                 securityEnabled: true,
-                adminPwd: "YENI_ADMIN_SIFRE",
-                readonlyPwd: "YENI_GOZLEMCI_SIFRE"
+                adminPwd: "m3444",
+                readonlyPwd: "3444"
             }
         };
         let summaryChart = null;
@@ -548,41 +542,24 @@
             applySettings();
             renderAll();
             startAutoBackupTimer();
-            checkOnlineStatus();
-            window.addEventListener('online', checkOnlineStatus);
-            window.addEventListener('offline', checkOnlineStatus);
         });
 
-        function checkOnlineStatus() {
-            const dot = document.getElementById('connDot');
-            const txt = document.getElementById('connText');
-            if (navigator.onLine) {
-                dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-                txt.className = "font-semibold text-emerald-400";
-                txt.innerText = "Bağlı (Çevrimiçi)";
-            } else {
-                dot.className = "w-2 h-2 rounded-full bg-rose-500";
-                txt.className = "font-semibold text-rose-400";
-                txt.innerText = "Çevrimdışı (İnternet Yok)";
-            }
-        }
-
         function loadLocalData() {
-            const saved = localStorage.getItem('by_metin_data_v6');
+            const saved = localStorage.getItem('by_metin_data_' + DATA_VERSION);
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
                     appData = { ...appData, ...parsed };
-                    if(!appData.settings) appData.settings = { userName: "Metin GEL GÖR", theme: "dark", autoBackupInterval: "15", isPrivate: false, securityEnabled: true, adminPwd: "YENI_ADMIN_SIFRE", readonlyPwd: "YENI_GOZLEMCI_SIFRE" };
+                    if(!appData.settings) appData.settings = { userName: "Metin GEL GÖR", theme: "dark", autoBackupInterval: "15", isPrivate: false, securityEnabled: true, adminPwd: "m3444", readonlyPwd: "3444" };
                     if(appData.settings.securityEnabled === undefined) appData.settings.securityEnabled = true;
-                    if(!appData.settings.adminPwd) appData.settings.adminPwd = "YENI_ADMIN_SIFRE";
-                    if(!appData.settings.readonlyPwd) appData.settings.readonlyPwd = "YENI_GOZLEMCI_SIFRE";
+                    if(!appData.settings.adminPwd) appData.settings.adminPwd = "m3444";
+                    if(!appData.settings.readonlyPwd) appData.settings.readonlyPwd = "3444";
                 } catch (e) {}
             }
         }
 
         function saveData() {
-            localStorage.setItem('by_metin_data_v6', JSON.stringify(appData));
+            localStorage.setItem('by_metin_data_' + DATA_VERSION, JSON.stringify(appData));
             renderAll();
         }
 
@@ -610,8 +587,8 @@
         function updateSecuritySettings() {
             if(currentUserRole !== 'admin') { alert("Bu ayarları sadece yönetici değiştirebilir."); return; }
             appData.settings.securityEnabled = document.getElementById('settingSecurityToggle').checked;
-            appData.settings.adminPwd = document.getElementById('settingAdminPwd').value.trim() || "YENI_ADMIN_SIFRE";
-            appData.settings.readonlyPwd = document.getElementById('settingReadonlyPwd').value.trim() || "YENI_GOZLEMCI_SIFRE";
+            appData.settings.adminPwd = document.getElementById('settingAdminPwd').value.trim() || "m3444";
+            appData.settings.readonlyPwd = document.getElementById('settingReadonlyPwd').value.trim() || "3444";
             saveData();
             alert("Güvenlik ayarları güncellendi!");
         }
