@@ -28,7 +28,7 @@
         <div style="background:#11222b;border:1px solid #334155;padding:24px;border-radius:16px;width:100%;max-width:320px;text-align:center;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
             <h2 style="color:#10b981;font-size:16px;font-weight:bold;margin-bottom:8px;">By METİN Cari & Kasa</h2>
             <p style="color:#94a3b8;font-size:11px;margin-bottom:16px;">Lütfen erişim şifresini girin</p>
-            <input type="password" id="loginPasswordInput" placeholder="Şifre (1453 veya 1234)" style="width:100%;padding:10px;background:#09141a;border:1px solid #334155;border-radius:8px;color:#fff;font-size:14px;text-align:center;margin-bottom:12px;outline:none;">
+            <input type="password" id="loginPasswordInput" placeholder="Şifre" style="width:100%;padding:10px;background:#09141a;border:1px solid #334155;border-radius:8px;color:#fff;font-size:14px;text-align:center;margin-bottom:12px;outline:none;">
             <div style="display:flex;align-items:center;justify-content:center;margin-bottom:16px;gap:6px;cursor:pointer;">
                 <input type="checkbox" id="rememberMeCheck" style="width:14px;height:14px;accent-color:#10b981;cursor:pointer;">
                 <label for="rememberMeCheck" style="color:#cbd5e1;font-size:11px;cursor:pointer;">Beni Hatırla (Bir daha sorma)</label>
@@ -95,6 +95,15 @@
         </header>
 
         <div class="content-area p-3 space-y-3">
+            <!-- BAĞLANTI DURUMU BARI -->
+            <div id="connectionStatusBar" class="bg-[#11222b] px-3 py-1.5 rounded-lg border border-slate-700 flex justify-between items-center text-[10px]">
+                <div class="flex items-center space-x-1.5">
+                    <span id="connDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="connText" class="font-semibold text-emerald-400">Bağlı (Çevrimiçi)</span>
+                </div>
+                <span class="text-slate-400">GitHub Pages</span>
+            </div>
+
             <div class="card-bg p-3 rounded-xl border border-slate-700 shadow-lg space-y-2.5 bg-[#11222b]">
                 <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
                     <div>
@@ -498,7 +507,24 @@
             applySettings();
             renderAll();
             startAutoBackupTimer();
+            checkOnlineStatus();
+            window.addEventListener('online', checkOnlineStatus);
+            window.addEventListener('offline', checkOnlineStatus);
         });
+
+        function checkOnlineStatus() {
+            const dot = document.getElementById('connDot');
+            const txt = document.getElementById('connText');
+            if (navigator.onLine) {
+                dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                txt.className = "font-semibold text-emerald-400";
+                txt.innerText = "Bağlı (Çevrimiçi)";
+            } else {
+                dot.className = "w-2 h-2 rounded-full bg-rose-500";
+                txt.className = "font-semibold text-rose-400";
+                txt.innerText = "Çevrimdışı (İnternet Yok)";
+            }
+        }
 
         function loadLocalData() {
             const saved = localStorage.getItem('by_metin_data_v6');
