@@ -14,7 +14,7 @@
         .light-mode { background-color: #f8fafc; color: #0f172a; }
         .compact-table td, .compact-table th { padding: 6px 8px; }
         .app-container { height: 100vh; display: flex; flex-direction: column; overflow: hidden; max-width: 480px; margin: 0 auto; justify-content: space-between; }
-        .content-area { flex: 1; overflow-y: auto; padding-bottom: 85px; }
+        .content-area { flex: 1; overflow-y: auto; padding-bottom: 90px; }
         ::-webkit-scrollbar { width: 4px; }
         .dark-mode ::-webkit-scrollbar-track { background: #0b1920; }
         .dark-mode ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
@@ -24,6 +24,7 @@
     </style>
 </head>
 <body class="dark-mode antialiased" id="appBody">
+    <!-- GİRİŞ EKRANI -->
     <div id="loginScreen" style="position:fixed;inset:0;background:#0b1920;z-index:99999;display:flex;justify-content:center;align-items:center;padding:20px;">
         <div style="background:#11222b;border:1px solid #334155;padding:24px;border-radius:16px;width:100%;max-width:320px;text-align:center;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
             <h2 style="color:#10b981;font-size:16px;font-weight:bold;margin-bottom:8px;">By METİN Cari & Kasa</h2>
@@ -38,14 +39,12 @@
         </div>
     </div>
 
-    <!-- YETKİLENDİRME VE GİRİŞ KONTROL SCRIPT -->
     <script>
         let savedSettings = JSON.parse(localStorage.getItem('by_metin_data_v6'))?.settings || {};
         let securityEnabled = savedSettings.securityEnabled !== undefined ? savedSettings.securityEnabled : true;
-        let adminPwd = savedSettings.adminPwd || "1453";
-        let readonlyPwd = savedSettings.readonlyPwd || "1234";
+        let adminPwd = savedSettings.adminPwd || "m3444";
+        let readonlyPwd = savedSettings.readonlyPwd || "3444";
         let currentUserRole = "admin";
-
         let isRemembered = localStorage.getItem('by_metin_remember_login') === 'true';
 
         if (!securityEnabled || isRemembered) {
@@ -75,160 +74,186 @@
     </script>
 
     <div class="app-container relative">
-        <header class="flex justify-between items-center px-4 pt-8 pb-2.5 border-b border-slate-700/80" id="mainHeader">
-            <button onclick="openMenuModal()" class="flex items-center space-x-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-600/60 transition active:scale-95">
+        <header class="flex justify-between items-center px-4 pt-4 pb-2 border-b border-slate-800/80" id="mainHeader">
+            <button onclick="openMenuModal()" class="flex items-center space-x-1.5 bg-[#11222b] hover:bg-slate-800 text-slate-100 px-2.5 py-1.5 rounded-xl border border-slate-700/80 transition active:scale-95 shadow-sm">
                 <i data-lucide="menu" class="w-4 h-4 text-emerald-400"></i>
                 <span class="text-xs font-bold">Menü</span>
             </button>
             <div class="text-center">
-                <div class="text-xs font-bold tracking-wide text-emerald-400" id="headerTitle">METİN</div>
-                <div class="text-[10px] text-slate-300 font-medium" id="headerSubTitle">Metin Türk</div>
+                <div class="text-xs font-extrabold tracking-widest text-emerald-400" id="headerTitle">METİN</div>
+                <div class="text-[10px] text-slate-400 font-medium" id="headerSubTitle">Metin GEL GÖR</div>
             </div>
-            <div class="flex items-center space-x-3">
-                <button onclick="togglePrivacy()" id="privacyBtn" class="p-1.5 rounded hover:bg-slate-800" title="Bakiyeleri Gizle / Göster">
+            <div class="flex items-center space-x-2">
+                <button onclick="togglePrivacy()" id="privacyBtn" class="p-1.5 rounded-xl bg-[#11222b] border border-slate-700/80 hover:bg-slate-800" title="Bakiyeleri Gizle / Göster">
                     <i data-lucide="eye" class="w-4 h-4 text-emerald-400"></i>
                 </button>
-                <button onclick="openSettings()" class="p-1.5 rounded hover:bg-slate-800 text-slate-200 hide-on-readonly" title="Ayarlar & Yedek">
+                <button onclick="openSettings()" class="p-1.5 rounded-xl bg-[#11222b] border border-slate-700/80 hover:bg-slate-800 text-slate-200 hide-on-readonly" title="Ayarlar & Yedek">
                     <i data-lucide="settings" class="w-4 h-4 text-slate-200"></i>
                 </button>
             </div>
         </header>
 
-        <div class="content-area p-3 space-y-3">
-            <!-- BAĞLANTI DURUMU BARI -->
-            <div id="connectionStatusBar" class="bg-[#11222b] px-3 py-1.5 rounded-lg border border-slate-700 flex justify-between items-center text-[10px]">
-                <div class="flex items-center space-x-1.5">
+        <div class="content-area p-3 space-y-2.5">
+            <!-- İNTERNET BAĞLANTI DURUM GÖSTERGESİ -->
+            <div id="connectionStatusBar" class="bg-[#11222b] px-3 py-1.5 rounded-2xl border border-slate-800 flex justify-between items-center text-[10px] shadow-sm">
+                <div class="flex items-center space-x-2">
                     <span id="connDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span id="connText" class="font-semibold text-emerald-400">Bağlı (Çevrimiçi)</span>
                 </div>
-                <span class="text-slate-400">GitHub Pages</span>
+                <span class="text-slate-400 font-medium">GitHub Pages</span>
             </div>
 
-            <div class="card-bg p-3 rounded-xl border border-slate-700 shadow-lg space-y-2.5 bg-[#11222b]">
-                <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+            <!-- GENEL ÖZET KARTI -->
+            <div class="card-bg p-3 rounded-2xl border border-slate-800 shadow-xl space-y-2.5 bg-[#11222b]">
+                <div class="flex justify-between items-start border-b border-slate-800/80 pb-2">
                     <div>
-                        <div class="text-[10px] font-semibold text-slate-300">GENEL NET BAKIYE</div>
-                        <div class="text-base font-extrabold text-emerald-400 maskable-amount" id="toplamAyBakiye">0,00 ₺</div>
+                        <div class="text-[9px] font-semibold text-slate-400 tracking-wider">GENEL NET BAKIYE</div>
+                        <div class="text-lg font-extrabold text-emerald-400 maskable-amount mt-0.5" id="toplamAyBakiye">0,00 ₺</div>
                     </div>
                     <div class="text-right space-y-0.5">
-                        <div class="text-[10px] text-emerald-400 font-medium">Nakit Kalan: <span class="font-bold maskable-amount" id="nakitKalan">0,00 ₺</span></div>
-                        <div class="text-[10px] text-blue-400 font-medium">Kredi Kalan: <span class="font-bold maskable-amount" id="krediKalan">0,00 ₺</span></div>
+                        <div class="text-[9px] text-emerald-400 font-medium">Nakit Kalan: <span class="font-bold maskable-amount" id="nakitKalan">0,00 ₺</span></div>
+                        <div class="text-[9px] text-blue-400 font-medium">Kredi Kalan: <span class="font-bold maskable-amount" id="krediKalan">0,00 ₺</span></div>
                     </div>
                 </div>
-                <div class="grid grid-cols-3 gap-1.5 bg-[#09141a] p-2 rounded-lg text-center">
+                <div class="grid grid-cols-3 gap-1.5 bg-[#09141a] p-2 rounded-xl text-center border border-slate-800">
                     <div>
-                        <div class="text-[9px] text-emerald-400 font-semibold">NAKİT GELİR</div>
-                        <div class="text-xs font-bold text-emerald-300 maskable-amount" id="toplamNakitGelir">0,00 ₺</div>
+                        <div class="text-[9px] text-emerald-400 font-bold">NAKİT GELİR</div>
+                        <div class="text-xs font-extrabold text-emerald-300 maskable-amount mt-0.5" id="toplamNakitGelir">0,00 ₺</div>
                     </div>
                     <div>
-                        <div class="text-[9px] text-blue-400 font-semibold">KREDİ GELİR</div>
-                        <div class="text-xs font-bold text-blue-300 maskable-amount" id="toplamKrediGelir">0,00 ₺</div>
+                        <div class="text-[9px] text-blue-400 font-bold">KREDİ GELİR</div>
+                        <div class="text-xs font-extrabold text-blue-300 maskable-amount mt-0.5" id="toplamKrediGelir">0,00 ₺</div>
                     </div>
                     <div>
-                        <div class="text-[9px] text-rose-400 font-semibold">GİDER / ÖDEME</div>
-                        <div class="text-xs font-bold text-rose-300 maskable-amount" id="toplamGiderOzet">0,00 ₺</div>
+                        <div class="text-[9px] text-rose-400 font-bold">GİDER / ÖDEME</div>
+                        <div class="text-xs font-extrabold text-rose-300 maskable-amount mt-0.5" id="toplamGiderOzet">0,00 ₺</div>
                     </div>
                 </div>
-                <div class="w-full h-12">
+                <div class="w-full h-10 pt-1">
                     <canvas id="miniSummaryChart"></canvas>
                 </div>
             </div>
 
+            <!-- CARİ VE TEDARİKÇİ HESAPLARI GÖRÜNÜMÜ -->
             <div id="view-islemler" class="space-y-2">
-                <div class="flex justify-between items-center px-1">
-                    <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">CARİ VE TEDARİKÇİ HESAPLARI</span>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="switchView('cariEkle')" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-lg font-bold flex items-center shadow-md hide-on-readonly">
-                            <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Yeni Cari
-                        </button>
-                        <button onclick="shareCarilerWhatsapp()" class="text-[10px] bg-emerald-800 hover:bg-emerald-900 text-emerald-100 px-2 py-1 rounded font-medium flex items-center border border-emerald-600/50">
-                            <i data-lucide="message-square" class="w-3 h-3 mr-1"></i> WhatsApp Cari Raporu
-                        </button>
+                <div class="px-0.5">
+                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">CARİ VE TEDARİKÇİ HESAPLARI</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <div onclick="switchView('cariEkle')" class="bg-[#11222b] hover:bg-[#162a35] border border-slate-800 hover:border-emerald-500/50 p-2.5 rounded-2xl cursor-pointer shadow-md transition flex items-center justify-between hide-on-readonly">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0">
+                                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <div class="text-xs font-bold text-white truncate">Yeni Cari</div>
+                                <div class="text-[8px] text-slate-400 truncate">Müşteri / Tedarikçi</div>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500 shrink-0"></i>
+                    </div>
+
+                    <div onclick="shareCarilerWhatsapp()" class="bg-[#11222b] hover:bg-[#162a35] border border-slate-800 hover:border-emerald-500/50 p-2.5 rounded-2xl cursor-pointer shadow-md transition flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0">
+                                <i data-lucide="message-square" class="w-4 h-4"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <div class="text-xs font-bold text-white truncate">WhatsApp Raporu</div>
+                                <div class="text-[8px] text-slate-400 truncate">Cari Dökümünü Paylaş</div>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500 shrink-0"></i>
                     </div>
                 </div>
-                <div id="cariHesaplarListesi" class="space-y-1.5"></div>
+
+                <div id="cariHesaplarListesi" class="space-y-1.5 pt-0.5"></div>
             </div>
 
-            <div id="view-gelir" class="hidden bg-[#11222b] p-3 rounded-xl border border-slate-700 space-y-3">
+            <!-- GELİR KAYDI -->
+            <div id="view-gelir" class="hidden bg-[#11222b] p-3.5 rounded-2xl border border-slate-800 space-y-2.5">
                 <h3 class="text-xs font-bold text-emerald-400 uppercase flex items-center">
                     <i data-lucide="plus-circle" class="w-4 h-4 mr-1.5"></i> Günlük Satış / Gelir Kaydı
                 </h3>
                 <form id="satisForm" onsubmit="handleSatisSubmit(event)" class="space-y-2 text-xs">
                     <div>
                         <label class="block text-[10px] text-slate-300 mb-1">Tarih</label>
-                        <input type="date" id="satisTarih" required class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                        <input type="date" id="satisTarih" required class="w-full p-2.5 bg-[#09141a] border border-slate-800 rounded-xl text-white">
                     </div>
                     <div>
                         <label class="block text-[10px] text-emerald-400 mb-1">Nakit Satış Tutarı (₺)</label>
-                        <input type="number" step="0.01" min="0" id="satisNakit" placeholder="0.00" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                        <input type="number" step="0.01" min="0" id="satisNakit" placeholder="0.00" class="w-full p-2.5 bg-[#09141a] border border-slate-800 rounded-xl text-white">
                     </div>
                     <div>
                         <label class="block text-[10px] text-blue-400 mb-1">Kredi Kartı Satış Tutarı (₺)</label>
-                        <input type="number" step="0.01" min="0" id="satisKredi" placeholder="0.00" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                        <input type="number" step="0.01" min="0" id="satisKredi" placeholder="0.00" class="w-full p-2.5 bg-[#09141a] border border-slate-800 rounded-xl text-white">
                     </div>
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded text-xs hide-on-readonly">Geliri Kaydet</button>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs hide-on-readonly shadow-md">Geliri Kaydet</button>
                 </form>
             </div>
 
-            <div id="view-gider" class="hidden bg-[#11222b] p-3 rounded-xl border border-slate-700 space-y-3">
+            <!-- GİDER KAYDI -->
+            <div id="view-gider" class="hidden bg-[#11222b] p-3.5 rounded-2xl border border-slate-800 space-y-2.5">
                 <h3 class="text-xs font-bold text-rose-400 uppercase flex items-center">
                     <i data-lucide="minus-circle" class="w-4 h-4 mr-1.5"></i> Firma Ödemesi / Gider Kaydı
                 </h3>
                 <form id="odemeForm" onsubmit="handleOdemeSubmit(event)" class="space-y-2 text-xs">
                     <div>
                         <label class="block text-[10px] text-slate-300 mb-1">Tarih</label>
-                        <input type="date" id="odemeTarih" required class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                        <input type="date" id="odemeTarih" required class="w-full p-2.5 bg-[#09141a] border border-slate-800 rounded-xl text-white">
                     </div>
                     <div>
                         <label class="block text-[10px] text-slate-300 mb-1">Ödeme Yapılacak Cari veya Gider Adı</label>
-                        <select id="odemeCariSelect" onchange="toggleHariciGiderInput()" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white mb-1.5">
+                        <select id="odemeCariSelect" onchange="toggleHariciGiderInput()" class="w-full p-2.5 bg-[#09141a] border border-slate-800 rounded-xl text-white mb-2">
                             <option value="__HARICI__">-- Cari Seçin --</option>
                         </select>
-                        <input type="text" id="odemeFirma" placeholder="Örn: Elektrik Faturası, Aslan Oyuncak" required class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                        <input type="text" id="odemeFirma" placeholder="Örn: Elektrik Faturası, Aslan Oyuncak" required class="w-full p-2.5 bg-[#09141a] border border-slate-800 rounded-xl text-white">
                     </div>
                     <div>
                         <label class="block text-[10px] text-slate-300 mb-1">Tutar (₺)</label>
-                        <input type="number" step="0.01" min="0.01" id="odemeTutar" placeholder="0.00" required class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                        <input type="number" step="0.01" min="0.01" id="odemeTutar" placeholder="0.00" required class="w-full p-2.5 bg-[#09141a] border border-slate-800 rounded-xl text-white">
                     </div>
                     <div>
                         <label class="block text-[10px] text-slate-300 mb-1">Ödeme Türü</label>
-                        <select id="odemeTur" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                        <select id="odemeTur" class="w-full p-2.5 bg-[#09141a] border border-slate-800 rounded-xl text-white">
                             <option value="Nakit">Nakit Kasadan</option>
                             <option value="Kredi Kartı">Kredi Kartı / Banka</option>
                         </select>
                     </div>
-                    <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 rounded text-xs hide-on-readonly">Gideri Kaydet</button>
+                    <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs hide-on-readonly shadow-md">Gideri Kaydet</button>
                 </form>
             </div>
 
+            <!-- HAREKETLER SEKMESİ -->
             <div id="view-notlar" class="hidden space-y-2">
-                <div class="bg-[#11222b] p-2.5 rounded-xl border border-slate-700 space-y-2">
+                <div class="bg-[#11222b] p-3 rounded-2xl border border-slate-800 space-y-2">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-bold text-slate-200">Kasa ve işlem günlüğü</span>
-                        <button onclick="shareKasaWhatsapp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] px-2.5 py-1.5 rounded flex items-center font-semibold">
+                        <button onclick="shareKasaWhatsapp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] px-2.5 py-1.5 rounded-xl flex items-center font-bold shadow-sm">
                             <i data-lucide="message-square" class="w-3.5 h-3.5 mr-1"></i> WhatsApp Rapor
                         </button>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800">
+                    <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/80">
                         <div>
                             <label class="block text-[9px] text-slate-400 mb-0.5">Başlangıç Tarihi</label>
-                            <input type="date" id="wpBaslangicTarih" class="w-full p-1 bg-[#09141a] border border-slate-700 rounded text-white text-[10px]">
+                            <input type="date" id="wpBaslangicTarih" onchange="renderAll()" class="w-full p-1.5 bg-[#09141a] border border-slate-800 rounded-xl text-white text-[10px]">
                         </div>
                         <div>
                             <label class="block text-[9px] text-slate-400 mb-0.5">Bitiş Tarihi</label>
-                            <input type="date" id="wpBitisTarih" class="w-full p-1 bg-[#09141a] border border-slate-700 rounded text-white text-[10px]">
+                            <input type="date" id="wpBitisTarih" onchange="renderAll()" class="w-full p-1.5 bg-[#09141a] border border-slate-800 rounded-xl text-white text-[10px]">
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-[#11222b] rounded-xl border border-slate-700 overflow-hidden max-h-[350px] overflow-y-auto">
-                    <table class="w-full text-left text-xs compact-table divide-y divide-slate-800">
+                <div class="bg-[#11222b] rounded-2xl border border-slate-800 overflow-hidden max-h-[350px] overflow-y-auto shadow-lg">
+                    <table class="w-full text-left text-xs compact-table divide-y divide-slate-800/80">
                         <thead class="bg-[#09141a] text-slate-300 sticky top-0">
                             <tr>
-                                <th onclick="toggleSort('tarih')" class="cursor-pointer hover:text-emerald-400 select-none">Tarih <span id="sortIconTarih" class="text-[10px]"></span></th>
-                                <th>Tür / Açıklama</th>
-                                <th onclick="toggleSort('tutar')" class="cursor-pointer hover:text-emerald-400 select-none text-right">Tutar <span id="sortIconTutar" class="text-[10px]"></span></th>
-                                <th class="text-center hide-on-readonly">İşlemler</th>
+                                <th onclick="toggleSort('tarih')" class="cursor-pointer hover:text-emerald-400 select-none py-2.5">Tarih <span id="sortIconTarih" class="text-[10px]"></span></th>
+                                <th class="py-2.5">Tür / Açıklama</th>
+                                <th onclick="toggleSort('tutar')" class="cursor-pointer hover:text-emerald-400 select-none text-right py-2.5">Tutar <span id="sortIconTutar" class="text-[10px]"></span></th>
+                                <th class="text-center hide-on-readonly py-2.5">İşlemler</th>
                             </tr>
                         </thead>
                         <tbody id="kasaLogTable" class="divide-y divide-slate-800/60"></tbody>
@@ -236,78 +261,95 @@
                 </div>
             </div>
 
-            <div id="view-cariEkle" class="hidden bg-[#11222b] p-3 rounded-xl border border-slate-700 space-y-3">
+            <!-- YENİ CARİ EKLEME GÖRÜNÜMÜ -->
+            <div id="view-cariEkle" class="hidden bg-[#11222b] p-3.5 rounded-2xl border border-slate-800 space-y-2.5 shadow-xl">
                 <h3 class="text-xs font-bold text-amber-400 uppercase flex items-center">
                     <i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Yeni Cari Hesap Kaydı
                 </h3>
                 <form id="cariForm" onsubmit="handleCariSubmit(event)" class="space-y-2 text-xs">
                     <div>
                         <label class="block text-[10px] text-slate-300 mb-1">Firma / Kişi Adı</label>
-                        <input type="text" id="cariFirma" placeholder="Örn: Aden Glass" required class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                        <input type="text" id="cariFirma" placeholder="Örn: Aden Glass" required class="w-full p-2.5 bg-[#09141a] border border-slate-800 rounded-xl text-white">
                     </div>
                     <div>
                         <label class="block text-[10px] text-slate-300 mb-1">Açılış İşlem Tipi</label>
-                        <select id="cariIslemTip" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                        <select id="cariIslemTip" class="w-full p-2.5 bg-[#09141a] border border-slate-800 rounded-xl text-white">
                             <option value="alis">Mal Alışı / Borçlandır (+)</option>
                             <option value="odeme">Ödeme Yapıldı / Düş (-)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-[10px] text-slate-300 mb-1">Tutar (₺)</label>
-                        <input type="number" step="0.01" min="0" id="cariTutar" placeholder="0.00" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                        <input type="number" step="0.01" min="0" id="cariTutar" placeholder="0.00" class="w-full p-2.5 bg-[#09141a] border border-slate-800 rounded-xl text-white">
                     </div>
                     <div>
                         <label class="block text-[10px] text-slate-300 mb-1">Açıklama / Not</label>
-                        <input type="text" id="cariAciklama" placeholder="Fatura veya not" class="w-full p-2 bg-[#09141a] border border-slate-700 rounded text-white">
+                        <input type="text" id="cariAciklama" placeholder="Fatura veya not" class="w-full p-2.5 bg-[#09141a] border border-slate-800 rounded-xl text-white">
                     </div>
                     <div class="flex gap-2 pt-1">
-                        <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded text-xs">Cariyi Kaydet</button>
-                        <button type="button" onclick="switchView('islemler')" class="bg-slate-700 text-white px-3 py-2 rounded text-xs">İptal</button>
+                        <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md">Cariyi Kaydet</button>
+                        <button type="button" onclick="switchView('islemler')" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold">İptal</button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <nav class="bg-[#071116] border-t border-slate-800 flex justify-around items-stretch py-2 px-1.5 z-20 min-h-[68px]">
-            <button onclick="switchView('notlar')" id="nav-notlar" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-300 hover:text-white active:bg-slate-800/60 transition">
-                <i data-lucide="file-text" class="w-6 h-6 mb-1"></i>
-                <span class="text-[11px] font-bold tracking-tight">HAREKETLER</span>
+        <!-- ALT NAVİGASYON ÇUBUĞU -->
+        <nav class="bg-[#071116] border-t border-slate-800/80 flex justify-around items-center py-1.5 px-2 z-20 absolute bottom-0 left-0 right-0 shadow-2xl">
+            <button onclick="switchView('notlar')" id="nav-notlar" class="nav-btn flex flex-col items-center justify-center py-1 px-2 rounded-2xl text-slate-400 hover:text-white transition">
+                <div class="w-9 h-9 rounded-xl bg-slate-800/40 border border-slate-700/40 flex items-center justify-center mb-0.5">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                </div>
+                <span class="text-[9px] font-bold tracking-tight">HAREKETLER</span>
+                <span class="text-[7px] text-slate-500 font-medium">Tüm İşlemler</span>
             </button>
-            <button onclick="switchView('islemler')" id="nav-islemler" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl text-emerald-400 font-extrabold active:bg-slate-800/60 transition">
-                <i data-lucide="users" class="w-6 h-6 mb-1"></i>
-                <span class="text-[11px] font-bold tracking-tight">CARİLER</span>
+            
+            <button onclick="switchView('islemler')" id="nav-islemler" class="nav-btn flex flex-col items-center justify-center py-1 px-2 rounded-2xl text-emerald-400 transition">
+                <div class="w-9 h-9 rounded-xl bg-slate-800/40 border border-slate-700/40 flex items-center justify-center mb-0.5">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                </div>
+                <span class="text-[9px] font-bold tracking-tight">CARİLER</span>
+                <span class="text-[7px] text-slate-400 font-medium">Müşteri / Tedarikçi</span>
             </button>
-            <button onclick="switchView('gelir')" id="nav-gelir" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-300 hover:text-white active:bg-slate-800/60 transition">
-                <i data-lucide="plus-circle" class="w-6 h-6 mb-1"></i>
-                <span class="text-[11px] font-bold tracking-tight">GELİR</span>
+            
+            <button onclick="switchView('gelir')" id="nav-gelir" class="nav-btn flex flex-col items-center justify-center py-0.5 px-2 rounded-2xl text-white transition">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center mb-0.5 shadow-lg shadow-emerald-950/60 ring-2 ring-emerald-400/20">
+                    <i data-lucide="arrow-up" class="w-5 h-5 stroke-[2.5]"></i>
+                </div>
+                <span class="text-[9px] font-extrabold tracking-tight text-emerald-400">GELİR</span>
+                <span class="text-[7px] text-emerald-500 font-bold">Gelir Ekle</span>
             </button>
-            <button onclick="switchView('gider')" id="nav-gider" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-300 hover:text-white active:bg-slate-800/60 transition">
-                <i data-lucide="minus-circle" class="w-6 h-6 mb-1"></i>
-                <span class="text-[11px] font-bold tracking-tight">GİDER</span>
+            
+            <button onclick="switchView('gider')" id="nav-gider" class="nav-btn flex flex-col items-center justify-center py-0.5 px-2 rounded-2xl text-white transition">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-600 to-rose-400 flex items-center justify-center mb-0.5 shadow-lg shadow-rose-950/60 ring-2 ring-rose-400/20">
+                    <i data-lucide="arrow-down" class="w-5 h-5 stroke-[2.5]"></i>
+                </div>
+                <span class="text-[9px] font-extrabold tracking-tight text-rose-400">GİDER</span>
+                <span class="text-[7px] text-rose-500 font-bold">Gider Ekle</span>
             </button>
         </nav>
     </div>
 
     <!-- HIZLI MENÜ MODALI -->
     <div id="menuModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
-        <div class="bg-[#11222b] border border-slate-700 rounded-2xl shadow-2xl w-full max-w-sm p-4 space-y-3.5 text-slate-200 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+        <div class="bg-[#11222b] border border-slate-800 rounded-3xl shadow-2xl w-full max-w-sm p-4 space-y-3 text-slate-200 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                 <div>
-                    <h3 class="text-sm font-extrabold text-emerald-400">Hızlı Menü & Raporlar</h3>
+                    <h3 class="text-xs font-extrabold text-emerald-400">Hızlı Menü & Raporlar</h3>
                     <div class="text-[10px] text-slate-300 font-medium" id="menuUserName">Metin Türk</div>
                 </div>
-                <button onclick="closeMenuModal()" class="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">✕</button>
+                <button onclick="closeMenuModal()" class="p-1 rounded-xl bg-slate-800 text-slate-300 hover:text-white">✕</button>
             </div>
 
             <div class="space-y-1.5">
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ciro Özeti</div>
                 <div class="grid grid-cols-2 gap-2">
-                    <div class="bg-[#09141a] p-2.5 rounded-xl border border-emerald-500/30">
+                    <div class="bg-[#09141a] p-2.5 rounded-2xl border border-slate-800">
                         <div class="flex justify-between items-center text-[10px] text-emerald-400 font-semibold mb-1"><span>Bugün Ciro</span><i data-lucide="trending-up" class="w-3.5 h-3.5"></i></div>
                         <div class="text-sm font-extrabold text-white maskable-amount" id="menuBugunCiro">0,00 ₺</div>
                         <div class="text-[9px] text-slate-400 mt-0.5" id="menuBugunDetay">Nakit: 0₺ | Kredi: 0₺</div>
                     </div>
-                    <div class="bg-[#09141a] p-2.5 rounded-xl border border-blue-500/30">
+                    <div class="bg-[#09141a] p-2.5 rounded-2xl border border-slate-800">
                         <div class="flex justify-between items-center text-[10px] text-blue-400 font-semibold mb-1"><span>Son 7 Gün Ciro</span><i data-lucide="calendar" class="w-3.5 h-3.5"></i></div>
                         <div class="text-sm font-extrabold text-white maskable-amount" id="menuHaftalikCiro">0,00 ₺</div>
                         <div class="text-[9px] text-slate-400 mt-0.5" id="menuHaftalikDetay">Nakit: 0₺ | Kredi: 0₺</div>
@@ -315,31 +357,30 @@
                 </div>
             </div>
 
-            <!-- TARİH ARALIKLI KASA & SATIŞ RAPORU -->
-            <div class="space-y-2 border-t border-slate-800 pt-2.5">
+            <div class="space-y-2 border-t border-slate-800 pt-2">
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tarih Aralıklı Kasa & Satış Raporu</div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-[9px] text-slate-400 mb-0.5">Başlangıç</label>
-                        <input type="date" id="kasaRaporBaslangic" onchange="updateKasaRaporPreview()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-[10px]">
+                        <input type="date" id="kasaRaporBaslangic" onchange="updateKasaRaporPreview()" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white text-[10px]">
                     </div>
                     <div>
                         <label class="block text-[9px] text-slate-400 mb-0.5">Bitiş</label>
-                        <input type="date" id="kasaRaporBitis" onchange="updateKasaRaporPreview()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-[10px]">
+                        <input type="date" id="kasaRaporBitis" onchange="updateKasaRaporPreview()" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white text-[10px]">
                     </div>
                 </div>
-                <div class="bg-[#09141a] border border-slate-700/80 rounded-xl p-2.5 space-y-1.5" id="kasaRaporPreviewContent">
+                <div class="bg-[#09141a] border border-slate-800 rounded-2xl p-2.5 space-y-1.5" id="kasaRaporPreviewContent">
                     <div class="text-center text-slate-500 py-2">Lütfen tarih aralığı seçin.</div>
                 </div>
             </div>
 
-            <div class="space-y-2 border-t border-slate-800 pt-2.5">
+            <div class="space-y-2 border-t border-slate-800 pt-2">
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tarih Aralıklı Cari Raporu</div>
                 <div class="grid grid-cols-2 gap-2">
-                    <div><label class="block text-[9px] text-slate-400 mb-0.5">Başlangıç</label><input type="date" id="cariRaporBaslangic" onchange="updateCariPreview()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-[10px]"></div>
-                    <div><label class="block text-[9px] text-slate-400 mb-0.5">Bitiş</label><input type="date" id="cariRaporBitis" onchange="updateCariPreview()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-[10px]"></div>
+                    <div><label class="block text-[9px] text-slate-400 mb-0.5">Başlangıç</label><input type="date" id="cariRaporBaslangic" onchange="updateCariPreview()" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white text-[10px]"></div>
+                    <div><label class="block text-[9px] text-slate-400 mb-0.5">Bitiş</label><input type="date" id="cariRaporBitis" onchange="updateCariPreview()" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white text-[10px]"></div>
                 </div>
-                <div class="bg-[#09141a] border border-slate-700/80 rounded-xl p-2.5 space-y-1.5">
+                <div class="bg-[#09141a] border border-slate-800 rounded-2xl p-2.5 space-y-1.5">
                     <div class="flex justify-between items-center text-[10px] font-bold text-emerald-400 border-b border-slate-800 pb-1">
                         <span>Rapor Önizlemesi</span>
                         <span id="previewToplamDurum" class="text-white">Toplam: 0,00 ₺</span>
@@ -355,17 +396,17 @@
                 </div>
             </div>
 
-            <div class="space-y-1.5 border-t border-slate-800 pt-2.5">
+            <div class="space-y-1.5 border-t border-slate-800 pt-2">
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tüm Veriler (Yedek Raporu)</div>
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="exportToExcel()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 p-2 rounded-xl flex items-center justify-center space-x-1.5 font-bold text-xs transition"><i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i><span>Tüm Excel (.xlsx)</span></button>
-                    <button onclick="exportToCsv()" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 p-2 rounded-xl flex items-center justify-center space-x-1.5 font-bold text-xs transition"><i data-lucide="table" class="w-4 h-4 text-blue-400"></i><span>Tüm CSV İndir</span></button>
+                    <button onclick="exportToExcel()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 p-2.5 rounded-xl flex items-center justify-center space-x-1.5 font-bold text-xs transition"><i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i><span>Tüm Excel (.xlsx)</span></button>
+                    <button onclick="exportToCsv()" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 p-2.5 rounded-xl flex items-center justify-center space-x-1.5 font-bold text-xs transition"><i data-lucide="table" class="w-4 h-4 text-blue-400"></i><span>Tüm CSV İndir</span></button>
                 </div>
             </div>
 
-            <div class="space-y-1.5 border-t border-slate-800 pt-2.5">
+            <div class="space-y-1.5 border-t border-slate-800 pt-2">
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Uygulama Bilgisi</div>
-                <div class="bg-[#09141a] p-2.5 rounded-xl border border-slate-800 space-y-1 text-[11px]">
+                <div class="bg-[#09141a] p-2.5 rounded-2xl border border-slate-800 space-y-1 text-[11px]">
                     <div class="flex justify-between items-center"><span class="text-slate-400">Uygulama:</span><span class="font-bold text-emerald-400">By METİN Cari & Kasa</span></div>
                     <div class="flex justify-between items-center"><span class="text-slate-400">Sürüm:</span><span class="font-semibold text-slate-200">v2.5 Pro Mobil</span></div>
                     <div class="flex justify-between items-center"><span class="text-slate-400">Kayıt:</span><span class="font-semibold text-slate-200" id="menuKayitSayisi">0 Kasa / 0 Cari</span></div>
@@ -376,7 +417,7 @@
 
     <!-- CARİ DETAY MODALI -->
     <div id="cariDetailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
-        <div class="bg-[#11222b] border border-slate-700 rounded-xl shadow-2xl w-full max-w-sm p-3.5 space-y-3 text-slate-200 max-h-[90vh] flex flex-col">
+        <div class="bg-[#11222b] border border-slate-800 rounded-3xl shadow-2xl w-full max-w-sm p-4 space-y-3 text-slate-200 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                 <div>
                     <h3 class="text-xs font-bold text-white" id="modalCariTitle">Firma Detayı</h3>
@@ -384,47 +425,47 @@
                 </div>
                 <button onclick="closeCariDetail()" class="text-slate-400 hover:text-white text-base">✕</button>
             </div>
-            <form id="cariHareketForm" onsubmit="handleCariHareketSubmit(event)" class="bg-[#09141a] p-2 rounded-lg space-y-1.5 text-xs border border-slate-800 hide-on-readonly">
+            <form id="cariHareketForm" onsubmit="handleCariHareketSubmit(event)" class="bg-[#09141a] p-2.5 rounded-2xl space-y-2 text-xs border border-slate-800 hide-on-readonly">
                 <div class="text-[10px] font-bold text-amber-400">Yeni Borç / Ödeme Ekle</div>
                 <input type="hidden" id="modalCariFirmaName">
                 <div class="grid grid-cols-2 gap-1.5">
-                    <select id="modalHareketTip" class="p-1.5 bg-[#11222b] border border-slate-700 rounded text-white text-[10px]">
+                    <select id="modalHareketTip" class="p-2 bg-[#11222b] border border-slate-800 rounded-xl text-white text-[10px]">
                         <option value="alis">Mal Alışı (Borç +)</option>
                         <option value="odeme">Ödeme Yapıldı (Borç -)</option>
                     </select>
-                    <input type="number" step="0.01" min="0.01" id="modalHareketTutar" placeholder="Tutar (₺)" required class="p-1.5 bg-[#11222b] border border-slate-700 rounded text-white text-[10px]">
+                    <input type="number" step="0.01" min="0.01" id="modalHareketTutar" placeholder="Tutar (₺)" required class="p-2 bg-[#11222b] border border-slate-800 rounded-xl text-white text-[10px]">
                 </div>
-                <input type="text" id="modalHareketAciklama" placeholder="Açıklama / Belge no" class="w-full p-1.5 bg-[#11222b] border border-slate-700 rounded text-white text-[10px]">
-                <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-1 rounded text-[10px]">İşlemi Kaydet</button>
+                <input type="text" id="modalHareketAciklama" placeholder="Açıklama / Belge no" class="w-full p-2 bg-[#11222b] border border-slate-800 rounded-xl text-white text-[10px]">
+                <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-1.5 rounded-xl text-[10px]">İşlemi Kaydet</button>
             </form>
             <div class="flex-1 overflow-y-auto space-y-1 border-t border-slate-800 pt-2">
                 <div class="text-[10px] font-semibold text-slate-300 mb-1">İşlem Geçmişi</div>
                 <div id="modalCariLogs" class="space-y-1"></div>
             </div>
-            <button onclick="deleteEntireCari()" class="w-full bg-rose-600/20 text-rose-400 border border-rose-500/30 text-[10px] py-1.5 rounded font-semibold hide-on-readonly">Bu Cari Hesabı ve Tüm Geçmişini Sil</button>
+            <button onclick="deleteEntireCari()" class="w-full bg-rose-600/20 text-rose-400 border border-rose-500/30 text-[10px] py-2 rounded-xl font-semibold hide-on-readonly">Bu Cari Hesabı ve Tüm Geçmişini Sil</button>
         </div>
     </div>
 
     <!-- KASA KAYDI DÜZENLEME MODALI -->
     <div id="editKasaModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
-        <div class="bg-[#11222b] border border-slate-700 rounded-xl shadow-2xl w-full max-w-xs p-3 space-y-2 text-slate-200">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+        <div class="bg-[#11222b] border border-slate-800 rounded-3xl shadow-2xl w-full max-w-xs p-4 space-y-2.5 text-slate-200">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-1.5">
                 <h3 class="text-xs font-bold text-white">Gelir / Gider Kaydı Düzenle</h3>
                 <button onclick="closeEditKasaModal()" class="text-slate-400 hover:text-white">✕</button>
             </div>
             <form id="editKasaForm" onsubmit="saveKasaEdit(event)" class="space-y-2 text-xs">
                 <input type="hidden" id="editKasaId">
-                <div><label class="block text-[10px] text-slate-300">Açıklama</label><input type="text" id="editKasaAciklama" required class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white"></div>
-                <div><label class="block text-[10px] text-slate-300">Nakit Tutar (₺)</label><input type="number" step="0.01" id="editKasaNakit" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white"></div>
-                <div><label class="block text-[10px] text-slate-300">Kredi Kartı Tutar (₺)</label><input type="number" step="0.01" id="editKasaKredi" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white"></div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 rounded text-xs">Değişiklikleri Kaydet</button>
+                <div><label class="block text-[10px] text-slate-300">Açıklama</label><input type="text" id="editKasaAciklama" required class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white"></div>
+                <div><label class="block text-[10px] text-slate-300">Nakit Tutar (₺)</label><input type="number" step="0.01" id="editKasaNakit" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white"></div>
+                <div><label class="block text-[10px] text-slate-300">Kredi Kartı Tutar (₺)</label><input type="number" step="0.01" id="editKasaKredi" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white"></div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-xs shadow-md">Değişiklikleri Kaydet</button>
             </form>
         </div>
     </div>
 
     <!-- AYARLAR & YEDEK MODALI -->
     <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-[#11222b] border border-slate-700 rounded-xl shadow-2xl w-full max-w-sm p-4 space-y-3 text-slate-200 max-h-[90vh] overflow-y-auto">
+        <div class="bg-[#11222b] border border-slate-800 rounded-3xl shadow-2xl w-full max-w-sm p-4 space-y-3 text-slate-200 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                 <h3 class="text-xs font-bold text-white">Ayarlar ve Yönetici Paneli</h3>
                 <button onclick="closeSettings()" class="text-slate-400 hover:text-white">✕</button>
@@ -432,11 +473,11 @@
             <div class="space-y-3 text-xs">
                 <div class="space-y-1">
                     <label class="block text-[10px] font-semibold text-emerald-400">Kullanıcı / İşletme Adı</label>
-                    <input type="text" id="settingUserName" placeholder="Örn: Metin Türk" onchange="updateProfileName()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-xs">
+                    <input type="text" id="settingUserName" placeholder="Örn: Metin Türk" onchange="updateProfileName()" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white text-xs">
                 </div>
                 <div class="space-y-1">
                     <label class="block text-[10px] font-semibold text-blue-400">Görünüm Teması</label>
-                    <select id="settingTheme" onchange="changeTheme()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-xs">
+                    <select id="settingTheme" onchange="changeTheme()" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white text-xs">
                         <option value="dark">Koyu Tema (Dark Mode)</option>
                         <option value="light">Açık Tema (Light Mode)</option>
                     </select>
@@ -445,34 +486,34 @@
                 <!-- GÜVENLİK VE ŞİFRE YÖNETİMİ -->
                 <div class="space-y-2 border-t border-slate-800 pt-2">
                     <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">🔒 Şifre & Güvenlik Yönetimi</div>
-                    <div class="flex items-center justify-between bg-[#09141a] p-2 rounded border border-slate-800">
+                    <div class="flex items-center justify-between bg-[#09141a] p-2.5 rounded-xl border border-slate-800">
                         <span class="text-slate-300">Şifre Koruması Aktif mi?</span>
                         <input type="checkbox" id="settingSecurityToggle" onchange="updateSecuritySettings()" class="w-4 h-4 accent-emerald-500 cursor-pointer">
                     </div>
                     <div class="space-y-1">
                         <label class="block text-[9px] text-slate-400">Yönetici Şifresi (Tam Yetki)</label>
-                        <input type="text" id="settingAdminPwd" onchange="updateSecuritySettings()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-xs">
+                        <input type="text" id="settingAdminPwd" onchange="updateSecuritySettings()" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white text-xs">
                     </div>
                     <div class="space-y-1">
                         <label class="block text-[9px] text-slate-400">Gözlemci Şifresi (Sadece Okuma)</label>
-                        <input type="text" id="settingReadonlyPwd" onchange="updateSecuritySettings()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-xs">
+                        <input type="text" id="settingReadonlyPwd" onchange="updateSecuritySettings()" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white text-xs">
                     </div>
-                    <button onclick="logoutAndForget()" class="w-full bg-amber-600/20 text-amber-400 hover:bg-amber-600/30 p-2 rounded flex items-center justify-center font-medium border border-amber-500/30 mt-1">Cihazdaki "Beni Hatırla"nı Unut (Şifre Sor)</button>
+                    <button onclick="logoutAndForget()" class="w-full bg-amber-600/20 text-amber-400 hover:bg-amber-600/30 p-2.5 rounded-xl font-medium border border-amber-500/30 mt-1">Cihazdaki "Beni Hatırla"nı Unut (Şifre Sor)</button>
                 </div>
 
                 <div class="space-y-1 border-t border-slate-800 pt-2">
                     <label class="block text-[10px] font-semibold text-amber-400">Otomatik Yedek Sıklığı (Dakika)</label>
-                    <input type="number" id="settingAutoBackupMinutes" min="0" placeholder="15" onchange="updateAutoBackupSetting()" class="w-full p-1.5 bg-[#09141a] border border-slate-700 rounded text-white text-xs">
+                    <input type="number" id="settingAutoBackupMinutes" min="0" placeholder="15" onchange="updateAutoBackupSetting()" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white text-xs">
                     <div class="text-[9px] text-slate-400" id="autoBackupStatusInfo">Dakika cinsinden süre girebilirsiniz.</div>
                 </div>
                 <div class="space-y-2 border-t border-slate-800 pt-2">
                     <label class="block text-[10px] font-semibold text-emerald-400">📁 Dosya Olarak Yedekle (JSON)</label>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="exportToJsonFile()" class="w-full bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 p-2 rounded flex items-center justify-center font-medium border border-emerald-500/30"><i data-lucide="download" class="w-3.5 h-3.5 mr-1"></i> Dosya İndir</button>
-                        <label class="w-full bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 p-2 rounded flex items-center justify-center font-medium border border-blue-500/30 cursor-pointer"><i data-lucide="upload" class="w-3.5 h-3.5 mr-1"></i> Dosya Seç<input type="file" id="jsonFileInput" accept=".json" onchange="importFromJsonFile(event)" class="hidden"></label>
+                        <button onclick="exportToJsonFile()" class="w-full bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 p-2.5 rounded-xl flex items-center justify-center font-medium border border-emerald-500/30"><i data-lucide="download" class="w-3.5 h-3.5 mr-1"></i> Dosya İndir</button>
+                        <label class="w-full bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 p-2.5 rounded-xl flex items-center justify-center font-medium border border-blue-500/30 cursor-pointer"><i data-lucide="upload" class="w-3.5 h-3.5 mr-1"></i> Dosya Seç<input type="file" id="jsonFileInput" accept=".json" onchange="importFromJsonFile(event)" class="hidden"></label>
                     </div>
                 </div>
-                <button onclick="clearAllDataWithConfirmation()" class="w-full bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 p-2 rounded flex items-center justify-center font-medium border border-rose-500/30 mt-2"><i data-lucide="trash-2" class="w-4 h-4 mr-1.5"></i> Tüm Verileri Sıfırla</button>
+                <button onclick="clearAllDataWithConfirmation()" class="w-full bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 p-2.5 rounded-xl flex items-center justify-center font-medium border border-rose-500/30 mt-2"><i data-lucide="trash-2" class="w-4 h-4 mr-1.5"></i> Tüm Verileri Sıfırla</button>
             </div>
         </div>
     </div>
@@ -483,13 +524,13 @@
             kasaLogs: [],
             cariLogs: [],
             settings: { 
-                userName: "Metin Türk", 
+                userName: "Metin GEL GÖR", 
                 theme: "dark", 
                 autoBackupInterval: "15", 
                 isPrivate: false,
                 securityEnabled: true,
-                adminPwd: "1453",
-                readonlyPwd: "1234"
+                adminPwd: "YENI_ADMIN_SIFRE",
+                readonlyPwd: "YENI_GOZLEMCI_SIFRE"
             }
         };
         let summaryChart = null;
@@ -532,10 +573,10 @@
                 try {
                     const parsed = JSON.parse(saved);
                     appData = { ...appData, ...parsed };
-                    if(!appData.settings) appData.settings = { userName: "Metin Türk", theme: "dark", autoBackupInterval: "15", isPrivate: false, securityEnabled: true, adminPwd: "1453", readonlyPwd: "1234" };
+                    if(!appData.settings) appData.settings = { userName: "Metin GEL GÖR", theme: "dark", autoBackupInterval: "15", isPrivate: false, securityEnabled: true, adminPwd: "YENI_ADMIN_SIFRE", readonlyPwd: "YENI_GOZLEMCI_SIFRE" };
                     if(appData.settings.securityEnabled === undefined) appData.settings.securityEnabled = true;
-                    if(!appData.settings.adminPwd) appData.settings.adminPwd = "1453";
-                    if(!appData.settings.readonlyPwd) appData.settings.readonlyPwd = "1234";
+                    if(!appData.settings.adminPwd) appData.settings.adminPwd = "YENI_ADMIN_SIFRE";
+                    if(!appData.settings.readonlyPwd) appData.settings.readonlyPwd = "YENI_GOZLEMCI_SIFRE";
                 } catch (e) {}
             }
         }
@@ -546,10 +587,10 @@
         }
 
         function applySettings() {
-            document.getElementById('headerTitle').innerText = appData.settings.userName.split(' ')[0].toUpperCase() || "METİN";
-            document.getElementById('headerSubTitle').innerText = appData.settings.userName || "Metin Türk";
-            document.getElementById('menuUserName').innerText = appData.settings.userName || "Metin Türk";
-            document.getElementById('settingUserName').value = appData.settings.userName || "Metin Türk";
+            document.getElementById('headerTitle').innerText = (appData.settings.userName || "METİN").split(' ')[0].toUpperCase();
+            document.getElementById('headerSubTitle').innerText = appData.settings.userName || "Metin GEL GÖR";
+            document.getElementById('menuUserName').innerText = appData.settings.userName || "Metin GEL GÖR";
+            document.getElementById('settingUserName').value = appData.settings.userName || "Metin GEL GÖR";
             
             document.getElementById('settingSecurityToggle').checked = appData.settings.securityEnabled;
             document.getElementById('settingAdminPwd').value = appData.settings.adminPwd;
@@ -569,8 +610,8 @@
         function updateSecuritySettings() {
             if(currentUserRole !== 'admin') { alert("Bu ayarları sadece yönetici değiştirebilir."); return; }
             appData.settings.securityEnabled = document.getElementById('settingSecurityToggle').checked;
-            appData.settings.adminPwd = document.getElementById('settingAdminPwd').value.trim() || "1453";
-            appData.settings.readonlyPwd = document.getElementById('settingReadonlyPwd').value.trim() || "1234";
+            appData.settings.adminPwd = document.getElementById('settingAdminPwd').value.trim() || "YENI_ADMIN_SIFRE";
+            appData.settings.readonlyPwd = document.getElementById('settingReadonlyPwd').value.trim() || "YENI_GOZLEMCI_SIFRE";
             saveData();
             alert("Güvenlik ayarları güncellendi!");
         }
@@ -706,26 +747,26 @@
 
             contentEl.innerHTML = `
                 <div class="space-y-1.5 text-[11px]">
-                    <div class="flex justify-between items-center bg-[#11222b] px-2 py-1.5 rounded border border-slate-800">
+                    <div class="flex justify-between items-center bg-[#11222b] px-2 py-1.5 rounded-xl border border-slate-800">
                         <span class="text-slate-400 font-semibold">Seçili Gün Aralığı:</span>
                         <span class="font-extrabold text-amber-400 text-xs">${diffDays} Gün</span>
                     </div>
                     <div class="grid grid-cols-2 gap-1.5">
-                        <div class="bg-[#11222b] p-2 rounded border border-slate-800">
+                        <div class="bg-[#11222b] p-2 rounded-xl border border-slate-800">
                             <div class="text-[9px] text-emerald-400 font-semibold">NAKİT SATIŞ</div>
                             <div class="text-xs font-bold text-white maskable-amount">${nakitSatis.toFixed(2)} ₺</div>
                         </div>
-                        <div class="bg-[#11222b] p-2 rounded border border-slate-800">
+                        <div class="bg-[#11222b] p-2 rounded-xl border border-slate-800">
                             <div class="text-[9px] text-blue-400 font-semibold">KART / KREDİ SATIŞ</div>
                             <div class="text-xs font-bold text-white maskable-amount">${kartSatis.toFixed(2)} ₺</div>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-1.5">
-                        <div class="bg-[#11222b] p-2 rounded border border-slate-800">
+                        <div class="bg-[#11222b] p-2 rounded-xl border border-slate-800">
                             <div class="text-[9px] text-rose-400 font-semibold">NAKİT ÖDEME</div>
                             <div class="text-xs font-bold text-white maskable-amount">${nakitOdeme.toFixed(2)} ₺</div>
                         </div>
-                        <div class="bg-[#11222b] p-2 rounded border border-slate-800">
+                        <div class="bg-[#11222b] p-2 rounded-xl border border-slate-800">
                             <div class="text-[9px] text-rose-400 font-semibold">KART / KREDİ ÖDEME</div>
                             <div class="text-xs font-bold text-white maskable-amount">${kartOdeme.toFixed(2)} ₺</div>
                         </div>
@@ -765,7 +806,7 @@
                 const bakiye = cariBakiyeler[firma];
                 toplamBorcAlacak += bakiye;
                 const row = document.createElement('div');
-                row.className = 'flex justify-between items-center bg-[#11222b] px-2 py-1 rounded border border-slate-800';
+                row.className = 'flex justify-between items-center bg-[#11222b] px-2.5 py-1.5 rounded-xl border border-slate-800';
                 row.innerHTML = '<span class="font-medium text-slate-200">' + firma + '</span><span class="font-bold ' + (bakiye < 0 ? 'text-rose-400' : 'text-emerald-400') + '">' + bakiye.toFixed(2) + ' ₺</span>';
                 previewContainer.appendChild(row);
             });
@@ -841,9 +882,12 @@
                 document.getElementById('view-' + id).classList.add('hidden');
             });
             document.getElementById('view-' + viewId).classList.remove('hidden');
-            document.querySelectorAll('.nav-btn').forEach(btn => { btn.classList.remove('text-emerald-400', 'font-extrabold', 'bg-slate-800/50'); btn.classList.add('text-slate-300'); });
-            const navBtn = document.getElementById('nav-' + viewId);
-            if(navBtn) { navBtn.classList.remove('text-slate-300'); navBtn.classList.add('text-emerald-400', 'font-extrabold', 'bg-slate-800/50'); }
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => { 
+                btn.classList.remove('text-emerald-400');
+                btn.classList.add('text-slate-400');
+            });
+            
             if(viewId === 'gider') populateCariDropdown();
             lucide.createIcons();
         }
@@ -924,9 +968,9 @@
             appData.cariLogs.filter(l => l.firma === selectedCariFirma).forEach(log => {
                 if(log.tip === 'alis') bakiye -= log.tutar; else if(log.tip === 'odeme') bakiye += log.tutar;
                 const item = document.createElement('div');
-                item.className = "flex justify-between items-center bg-[#09141a] p-1.5 rounded border border-slate-800 text-[10px]";
+                item.className = "flex justify-between items-center bg-[#09141a] p-2 rounded-xl border border-slate-800 text-[10px]";
                 
-                let deleteBtnHtml = currentUserRole === 'admin' ? '<button onclick="deleteSingleCariLog(' + log.id + ')" class="text-rose-500">✕</button>' : '';
+                let deleteBtnHtml = currentUserRole === 'admin' ? '<button onclick="deleteSingleCariLog(' + log.id + ')" class="text-rose-500 font-bold px-1">✕</button>' : '';
 
                 item.innerHTML = '<div><div class="text-slate-200 font-medium">' + log.aciklama + '</div><div class="text-slate-400">' + log.tarih + '</div></div><div class="flex items-center space-x-2"><span class="font-bold ' + (log.tip === 'alis' ? 'text-rose-400' : 'text-emerald-400') + '">' + log.tutar.toFixed(2) + ' ₺</span>' + deleteBtnHtml + '</div>';
                 logsContainer.appendChild(item);
@@ -1028,14 +1072,21 @@
             cariListEl.innerHTML = '';
             const firmalar = Object.keys(cariBakiyeler);
             if(firmalar.length === 0) {
-                cariListEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs font-medium">Kayıtlı cari firma yok.</div>';
+                cariListEl.innerHTML = `
+                    <div class="text-center py-6 px-4 bg-[#11222b] rounded-2xl border border-slate-800 shadow-lg space-y-2">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400">
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                        </div>
+                        <div class="text-xs font-bold text-slate-300">Kayıtlı cari firma yok.</div>
+                        <div class="text-[9px] text-slate-400">Yeni cari ekleyerek işlem yapmaya başlayın.</div>
+                    </div>`;
             } else {
                 firmalar.forEach(firma => {
                     const bakiye = cariBakiyeler[firma];
                     const div = document.createElement('div');
-                    div.className = "flex justify-between items-center bg-[#11222b] hover:bg-[#162a35] cursor-pointer px-3 py-2.5 rounded-lg border border-slate-700 shadow-sm transition";
+                    div.className = "flex justify-between items-center bg-[#11222b] hover:bg-[#162a35] cursor-pointer px-3 py-2.5 rounded-2xl border border-slate-800 shadow-sm transition";
                     div.onclick = () => openCariDetail(firma);
-                    div.innerHTML = '<div class="flex items-center space-x-2"><i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i><span class="text-xs font-bold text-slate-100">' + firma + '</span></div><span class="text-xs font-bold ' + (bakiye < 0 ? 'text-rose-400' : 'text-emerald-400') + '">' + bakiye.toFixed(2) + ' ₺</span>';
+                    div.innerHTML = '<div class="flex items-center space-x-2"><div class="w-6 h-6 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400"><i data-lucide="chevron-right" class="w-3 h-3"></i></div><span class="text-xs font-bold text-slate-100">' + firma + '</span></div><span class="text-xs font-extrabold ' + (bakiye < 0 ? 'text-rose-400' : 'text-emerald-400') + '">' + bakiye.toFixed(2) + ' ₺</span>';
                     cariListEl.appendChild(div);
                 });
             }
@@ -1072,17 +1123,17 @@
                     if (log.source === 'kasa') {
                         if (log.tip === 'satis') {
                             badge = `
-                                <div class="font-semibold text-slate-100 mb-1">Günlük Satış Girişi</div>
+                                <div class="font-bold text-slate-100 mb-1">Günlük Satış Girişi</div>
                                 <div class="flex items-center space-x-1.5 text-[10px]">
-                                    <span class="px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/50">Nakit (${log.nakit.toFixed(2)}₺)</span>
-                                    <span class="px-1.5 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800/50">Kredi (${log.kredi.toFixed(2)}₺)</span>
+                                    <span class="px-2 py-0.5 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/50">Nakit (${log.nakit.toFixed(2)}₺)</span>
+                                    <span class="px-2 py-0.5 rounded-lg bg-blue-950 text-blue-400 border border-blue-800/50">Kredi (${log.kredi.toFixed(2)}₺)</span>
                                 </div>
                             `;
                         } else {
-                            badge = `<div class="font-semibold text-slate-100">${log.baslik}</div><div class="mt-0.5"><span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-950 text-rose-400">Kasa Gider</span></div>`;
+                            badge = `<div class="font-bold text-slate-100">${log.baslik}</div><div class="mt-0.5"><span class="text-[9px] px-1.5 py-0.5 rounded-lg bg-rose-950 text-rose-400">Kasa Gider</span></div>`;
                         }
                     } else {
-                        badge = `<div class="font-semibold text-slate-100">${log.baslik}</div><div class="mt-0.5">` + (log.tip === 'alis' ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-400">Cari Mal Alışı</span>' : '<span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-950 text-blue-400">Cari Ödeme</span>') + `</div>`;
+                        badge = `<div class="font-bold text-slate-100">${log.baslik}</div><div class="mt-0.5">` + (log.tip === 'alis' ? '<span class="text-[9px] px-1.5 py-0.5 rounded-lg bg-amber-950 text-amber-400">Cari Mal Alışı</span>' : '<span class="text-[9px] px-1.5 py-0.5 rounded-lg bg-blue-950 text-blue-400">Cari Ödeme</span>') + `</div>`;
                     }
 
                     let islemSign = (log.source === 'kasa' && log.tip === 'satis') || (log.source === 'cari' && log.tip === 'alis') ? '+' : '-';
@@ -1090,10 +1141,10 @@
                     
                     let actionsHtml = '';
                     if(currentUserRole === 'admin') {
-                        actionsHtml = log.source === 'kasa' ? '<button onclick="openEditKasaModal(' + log.originalId + ')" class="text-blue-400"><i data-lucide="edit-2" class="w-3 h-3"></i></button><button onclick="deleteKasaLog(' + log.originalId + ')" class="text-rose-400"><i data-lucide="trash-2" class="w-3 h-3"></i></button>' : '<button onclick="deleteCariLogFromMaster(' + log.originalId + ')" class="text-rose-400"><i data-lucide="trash-2" class="w-3 h-3"></i></button>';
+                        actionsHtml = log.source === 'kasa' ? '<button onclick="openEditKasaModal(' + log.originalId + ')" class="text-blue-400 p-1"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button><button onclick="deleteKasaLog(' + log.originalId + ')" class="text-rose-400 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '<button onclick="deleteCariLogFromMaster(' + log.originalId + ')" class="text-rose-400 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>';
                     }
 
-                    tr.innerHTML = '<td class="text-slate-300 text-[10px] align-top">' + log.tarih + '</td><td class="align-top">' + badge + '</td><td class="text-right font-semibold ' + tClass + ' align-top">' + islemSign + log.tutar.toFixed(2) + ' ₺</td><td class="text-center align-top space-x-1">' + actionsHtml + '</td>';
+                    tr.innerHTML = '<td class="text-slate-300 text-[10px] align-top py-2">' + log.tarih + '</td><td class="align-top py-2">' + badge + '</td><td class="text-right font-bold ' + tClass + ' align-top py-2">' + islemSign + log.tutar.toFixed(2) + ' ₺</td><td class="text-center align-top space-x-1 py-2">' + actionsHtml + '</td>';
                     kasaBody.appendChild(tr);
                 });
             }
@@ -1109,7 +1160,7 @@
         function initChart() {
             summaryChart = new Chart(document.getElementById('miniSummaryChart').getContext('2d'), {
                 type: 'bar',
-                data: { labels: ['Nakit', 'Kredi', 'Gider'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#10b981', '#3b82f6', '#f43f5e'], borderRadius: 3 }] },
+                data: { labels: ['Nakit', 'Kredi', 'Gider'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#10b981', '#3b82f6', '#f43f5e'], borderRadius: 4 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 8 }, color: '#cbd5e1' }, grid: { display: false } }, y: { ticks: { font: { size: 8 }, color: '#cbd5e1' }, grid: { color: '#1e293b' } } } }
             });
         }
