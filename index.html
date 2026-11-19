@@ -14,7 +14,7 @@
         .light-mode { background-color: #f8fafc; color: #0f172a; }
         .compact-table td, .compact-table th { padding: 6px 8px; }
         .app-container { height: 100vh; display: flex; flex-direction: column; overflow: hidden; max-width: 480px; margin: 0 auto; justify-content: space-between; }
-        .content-area { flex: 1; overflow-y: auto; padding-bottom: 90px; }
+        .content-area { flex: 1; overflow-y: auto; padding-bottom: 160px; }
         ::-webkit-scrollbar { width: 4px; }
         .dark-mode ::-webkit-scrollbar-track { background: #0b1920; }
         .dark-mode ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
@@ -24,7 +24,6 @@
     </style>
 </head>
 <body class="dark-mode antialiased" id="appBody">
-    <!-- GİRİŞ EKRANI -->
     <div id="loginScreen" style="position:fixed;inset:0;background:#0b1920;z-index:99999;display:flex;justify-content:center;align-items:center;padding:20px;">
         <div style="background:#11222b;border:1px solid #334155;padding:24px;border-radius:16px;width:100%;max-width:320px;text-align:center;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
             <h2 style="color:#10b981;font-size:16px;font-weight:bold;margin-bottom:8px;">By METİN Cari & Kasa</h2>
@@ -40,10 +39,9 @@
     </div>
 
     <script>
-        let DATA_VERSION = 'v9';
+        let DATA_VERSION = 'v13';
         let savedData = JSON.parse(localStorage.getItem('by_metin_data_' + DATA_VERSION)) || {};
         let savedSettings = savedData.settings || {};
-        
         let securityEnabled = savedSettings.securityEnabled !== undefined ? savedSettings.securityEnabled : true;
         let adminPwd = savedSettings.adminPwd || "m3444";
         let readonlyPwd = savedSettings.readonlyPwd || "3444";
@@ -59,7 +57,6 @@
         function checkAppLogin() {
             let girilenSifre = document.getElementById('loginPasswordInput').value;
             let remember = document.getElementById('rememberMeCheck').checked;
-
             if (girilenSifre === adminPwd) {
                 currentUserRole = "admin";
                 if (remember) localStorage.setItem('by_metin_remember_login', 'true');
@@ -70,8 +67,7 @@
                 document.body.classList.add("readonly-mode");
                 document.getElementById('loginScreen').style.display = 'none';
             } else {
-                let err = document.getElementById('loginErrorMsg');
-                err.style.display = 'block';
+                document.getElementById('loginErrorMsg').style.display = 'block';
             }
         }
     </script>
@@ -97,7 +93,6 @@
         </header>
 
         <div class="content-area p-3 space-y-2.5">
-            <!-- GENEL ÖZET KARTI -->
             <div class="card-bg p-3 rounded-2xl border border-slate-800 shadow-xl space-y-2.5 bg-[#11222b]">
                 <div class="flex justify-between items-start border-b border-slate-800/80 pb-2">
                     <div>
@@ -128,12 +123,10 @@
                 </div>
             </div>
 
-            <!-- CARİ VE TEDARİKÇİ HESAPLARI GÖRÜNÜMÜ -->
             <div id="view-islemler" class="space-y-2">
                 <div class="px-0.5">
                     <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">CARİ VE TEDARİKÇİ HESAPLARI</span>
                 </div>
-                
                 <div class="grid grid-cols-2 gap-2">
                     <div onclick="switchView('cariEkle')" class="bg-[#11222b] hover:bg-[#162a35] border border-slate-800 hover:border-emerald-500/50 p-2.5 rounded-2xl cursor-pointer shadow-md transition flex items-center justify-between hide-on-readonly">
                         <div class="flex items-center space-x-2">
@@ -147,7 +140,6 @@
                         </div>
                         <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500 shrink-0"></i>
                     </div>
-
                     <div onclick="shareCarilerWhatsapp()" class="bg-[#11222b] hover:bg-[#162a35] border border-slate-800 hover:border-emerald-500/50 p-2.5 rounded-2xl cursor-pointer shadow-md transition flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                             <div class="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0">
@@ -161,11 +153,9 @@
                         <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500 shrink-0"></i>
                     </div>
                 </div>
-
                 <div id="cariHesaplarListesi" class="space-y-1.5 pt-0.5"></div>
             </div>
 
-            <!-- GELİR KAYDI -->
             <div id="view-gelir" class="hidden bg-[#11222b] p-3.5 rounded-2xl border border-slate-800 space-y-2.5">
                 <h3 class="text-xs font-bold text-emerald-400 uppercase flex items-center">
                     <i data-lucide="plus-circle" class="w-4 h-4 mr-1.5"></i> Günlük Satış / Gelir Kaydı
@@ -187,7 +177,6 @@
                 </form>
             </div>
 
-            <!-- GİDER KAYDI -->
             <div id="view-gider" class="hidden bg-[#11222b] p-3.5 rounded-2xl border border-slate-800 space-y-2.5">
                 <h3 class="text-xs font-bold text-rose-400 uppercase flex items-center">
                     <i data-lucide="minus-circle" class="w-4 h-4 mr-1.5"></i> Firma Ödemesi / Gider Kaydı
@@ -219,11 +208,13 @@
                 </form>
             </div>
 
-            <!-- HAREKETLER SEKMESİ -->
             <div id="view-notlar" class="hidden space-y-2">
                 <div class="bg-[#11222b] p-3 rounded-2xl border border-slate-800 space-y-2">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-slate-200">Kasa ve işlem günlüğü</span>
+                        <div>
+                            <span class="text-xs font-bold text-slate-200 block">Kasa ve işlem günlüğü</span>
+                            <span class="text-[9px] text-slate-400">Sıralama: Son eklenen işlem en üstte</span>
+                        </div>
                         <button onclick="shareKasaWhatsapp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] px-2.5 py-1.5 rounded-xl flex items-center font-bold shadow-sm">
                             <i data-lucide="message-square" class="w-3.5 h-3.5 mr-1"></i> WhatsApp Rapor
                         </button>
@@ -239,14 +230,13 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-[#11222b] rounded-2xl border border-slate-800 overflow-hidden max-h-[350px] overflow-y-auto shadow-lg">
                     <table class="w-full text-left text-xs compact-table divide-y divide-slate-800/80">
                         <thead class="bg-[#09141a] text-slate-300 sticky top-0">
                             <tr>
-                                <th onclick="toggleSort('tarih')" class="cursor-pointer hover:text-emerald-400 select-none py-2.5">Tarih <span id="sortIconTarih" class="text-[10px]"></span></th>
+                                <th class="py-2.5">Tarih / Saat</th>
                                 <th class="py-2.5">Tür / Açıklama</th>
-                                <th onclick="toggleSort('tutar')" class="cursor-pointer hover:text-emerald-400 select-none text-right py-2.5">Tutar <span id="sortIconTutar" class="text-[10px]"></span></th>
+                                <th class="text-right py-2.5">Tutar</th>
                                 <th class="text-center hide-on-readonly py-2.5">İşlemler</th>
                             </tr>
                         </thead>
@@ -255,7 +245,6 @@
                 </div>
             </div>
 
-            <!-- YENİ CARİ EKLEME GÖRÜNÜMÜ -->
             <div id="view-cariEkle" class="hidden bg-[#11222b] p-3.5 rounded-2xl border border-slate-800 space-y-2.5 shadow-xl">
                 <h3 class="text-xs font-bold text-amber-400 uppercase flex items-center">
                     <i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Yeni Cari Hesap Kaydı
@@ -288,43 +277,34 @@
             </div>
         </div>
 
-        <!-- ALT NAVİGASYON ÇUBUĞU -->
-        <nav class="bg-[#071116] border-t border-slate-800/80 flex justify-around items-center py-1.5 px-2 z-20 absolute bottom-0 left-0 right-0 shadow-2xl">
-            <button onclick="switchView('notlar')" id="nav-notlar" class="nav-btn flex flex-col items-center justify-center py-1 px-2 rounded-2xl text-slate-400 hover:text-white transition">
-                <div class="w-9 h-9 rounded-xl bg-slate-800/40 border border-slate-700/40 flex items-center justify-center mb-0.5">
-                    <i data-lucide="file-text" class="w-4 h-4"></i>
+        <nav class="bg-[#071116] border-t border-slate-800/80 flex justify-around items-center py-2 px-2 z-20 absolute bottom-0 left-0 right-0 shadow-2xl">
+            <button onclick="switchView('notlar')" id="nav-notlar" class="nav-btn flex flex-col items-center justify-center py-1 px-2 rounded-2xl text-indigo-300 hover:text-indigo-200 transition">
+                <div class="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-400/30 flex items-center justify-center mb-1">
+                    <i data-lucide="file-text" class="w-4 h-4 text-indigo-400"></i>
                 </div>
                 <span class="text-[9px] font-bold tracking-tight">HAREKETLER</span>
-                <span class="text-[7px] text-slate-500 font-medium">Tüm İşlemler</span>
             </button>
-            
-            <button onclick="switchView('islemler')" id="nav-islemler" class="nav-btn flex flex-col items-center justify-center py-1 px-2 rounded-2xl text-emerald-400 transition">
-                <div class="w-9 h-9 rounded-xl bg-slate-800/40 border border-slate-700/40 flex items-center justify-center mb-0.5">
-                    <i data-lucide="users" class="w-4 h-4"></i>
+            <button onclick="switchView('islemler')" id="nav-islemler" class="nav-btn flex flex-col items-center justify-center py-1 px-2 rounded-2xl text-amber-300 hover:text-amber-200 transition">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center mb-1">
+                    <i data-lucide="users" class="w-4 h-4 text-amber-400"></i>
                 </div>
                 <span class="text-[9px] font-bold tracking-tight">CARİLER</span>
-                <span class="text-[7px] text-slate-400 font-medium">Müşteri / Tedarikçi</span>
             </button>
-            
             <button onclick="switchView('gelir')" id="nav-gelir" class="nav-btn flex flex-col items-center justify-center py-0.5 px-2 rounded-2xl text-white transition">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center mb-0.5 shadow-lg shadow-emerald-950/60 ring-2 ring-emerald-400/20">
-                    <i data-lucide="arrow-up" class="w-5 h-5 stroke-[2.5]"></i>
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center mb-1 shadow-lg shadow-emerald-950/60 ring-2 ring-emerald-400/20">
+                    <i data-lucide="arrow-up" class="w-5 h-5 stroke-[2.5] text-white"></i>
                 </div>
                 <span class="text-[9px] font-extrabold tracking-tight text-emerald-400">GELİR</span>
-                <span class="text-[7px] text-emerald-500 font-bold">Gelir Ekle</span>
             </button>
-            
             <button onclick="switchView('gider')" id="nav-gider" class="nav-btn flex flex-col items-center justify-center py-0.5 px-2 rounded-2xl text-white transition">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-600 to-rose-400 flex items-center justify-center mb-0.5 shadow-lg shadow-rose-950/60 ring-2 ring-rose-400/20">
-                    <i data-lucide="arrow-down" class="w-5 h-5 stroke-[2.5]"></i>
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-600 to-rose-400 flex items-center justify-center mb-1 shadow-lg shadow-rose-950/60 ring-2 ring-rose-400/20">
+                    <i data-lucide="arrow-down" class="w-5 h-5 stroke-[2.5] text-white"></i>
                 </div>
                 <span class="text-[9px] font-extrabold tracking-tight text-rose-400">GİDER</span>
-                <span class="text-[7px] text-rose-500 font-bold">Gider Ekle</span>
             </button>
         </nav>
     </div>
 
-    <!-- HIZLI MENÜ MODALI -->
     <div id="menuModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
         <div class="bg-[#11222b] border border-slate-800 rounded-3xl shadow-2xl w-full max-w-sm p-4 space-y-3 text-slate-200 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
@@ -334,7 +314,6 @@
                 </div>
                 <button onclick="closeMenuModal()" class="p-1 rounded-xl bg-slate-800 text-slate-300 hover:text-white">✕</button>
             </div>
-
             <div class="space-y-1.5">
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ciro Özeti</div>
                 <div class="grid grid-cols-2 gap-2">
@@ -350,7 +329,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="space-y-2 border-t border-slate-800 pt-2">
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tarih Aralıklı Kasa & Satış Raporu</div>
                 <div class="grid grid-cols-2 gap-2">
@@ -367,7 +345,6 @@
                     <div class="text-center text-slate-500 py-2">Lütfen tarih aralığı seçin.</div>
                 </div>
             </div>
-
             <div class="space-y-2 border-t border-slate-800 pt-2">
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tarih Aralıklı Cari Raporu</div>
                 <div class="grid grid-cols-2 gap-2">
@@ -389,7 +366,6 @@
                     <button onclick="exportCariOzetCsv()" class="bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 p-2 rounded-xl flex flex-col items-center justify-center font-bold text-[10px] transition"><i data-lucide="table" class="w-4 h-4 mb-0.5 text-amber-400"></i><span>CSV İndir</span></button>
                 </div>
             </div>
-
             <div class="space-y-1.5 border-t border-slate-800 pt-2">
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tüm Veriler (Yedek Raporu)</div>
                 <div class="grid grid-cols-2 gap-2">
@@ -397,19 +373,17 @@
                     <button onclick="exportToCsv()" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 p-2.5 rounded-xl flex items-center justify-center space-x-1.5 font-bold text-xs transition"><i data-lucide="table" class="w-4 h-4 text-blue-400"></i><span>Tüm CSV İndir</span></button>
                 </div>
             </div>
-
             <div class="space-y-1.5 border-t border-slate-800 pt-2">
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Uygulama Bilgisi</div>
                 <div class="bg-[#09141a] p-2.5 rounded-2xl border border-slate-800 space-y-1 text-[11px]">
                     <div class="flex justify-between items-center"><span class="text-slate-400">Uygulama:</span><span class="font-bold text-emerald-400">By METİN Cari & Kasa</span></div>
-                    <div class="flex justify-between items-center"><span class="text-slate-400">Sürüm:</span><span class="font-semibold text-slate-200">v2.9 Pro Mobil</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-400">Sürüm:</span><span class="font-semibold text-slate-200">v2.13 Pro Mobil</span></div>
                     <div class="flex justify-between items-center"><span class="text-slate-400">Kayıt:</span><span class="font-semibold text-slate-200" id="menuKayitSayisi">0 Kasa / 0 Cari</span></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CARİ DETAY MODALI -->
     <div id="cariDetailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
         <div class="bg-[#11222b] border border-slate-800 rounded-3xl shadow-2xl w-full max-w-sm p-4 space-y-3 text-slate-200 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
@@ -440,7 +414,6 @@
         </div>
     </div>
 
-    <!-- KASA KAYDI DÜZENLEME MODALI -->
     <div id="editKasaModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
         <div class="bg-[#11222b] border border-slate-800 rounded-3xl shadow-2xl w-full max-w-xs p-4 space-y-2.5 text-slate-200">
             <div class="flex justify-between items-center border-b border-slate-800 pb-1.5">
@@ -457,7 +430,6 @@
         </div>
     </div>
 
-    <!-- AYARLAR & YEDEK MODALI -->
     <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="bg-[#11222b] border border-slate-800 rounded-3xl shadow-2xl w-full max-w-sm p-4 space-y-3 text-slate-200 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
@@ -476,8 +448,21 @@
                         <option value="light">Açık Tema (Light Mode)</option>
                     </select>
                 </div>
-
-                <!-- GÜVENLİK VE ŞİFRE YÖNETİMİ -->
+                <div class="space-y-2 border-t border-slate-800 pt-2">
+                    <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">🕒 Günlük Görünüm Detayları</div>
+                    <div class="flex items-center justify-between bg-[#09141a] p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300">İşlem Saatini Göster (HH:MM)</span>
+                        <input type="checkbox" id="settingShowTimeToggle" onchange="updateDisplaySettings()" class="w-4 h-4 accent-emerald-500 cursor-pointer">
+                    </div>
+                </div>
+                <div class="space-y-2 border-t border-slate-800 pt-2">
+                    <div class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">🧭 Navigasyon Bar Düzeni</div>
+                    <div class="flex items-center justify-between bg-[#09141a] p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300">Sıralama Düzenleme Modu (Kilitli)</span>
+                        <input type="checkbox" id="settingNavEditToggle" onchange="toggleNavEditMode()" class="w-4 h-4 accent-indigo-500 cursor-pointer">
+                    </div>
+                    <button onclick="resetNavOrder()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-xl font-medium border border-slate-700 text-[11px]">Varsayılan Sıraya Döndür</button>
+                </div>
                 <div class="space-y-2 border-t border-slate-800 pt-2">
                     <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">🔒 Şifre & Güvenlik Yönetimi</div>
                     <div class="flex items-center justify-between bg-[#09141a] p-2.5 rounded-xl border border-slate-800">
@@ -494,17 +479,16 @@
                     </div>
                     <button onclick="logoutAndForget()" class="w-full bg-amber-600/20 text-amber-400 hover:bg-amber-600/30 p-2.5 rounded-xl font-medium border border-amber-500/30 mt-1">Cihazdaki "Beni Hatırla"nı Unut (Şifre Sor)</button>
                 </div>
-
                 <div class="space-y-1 border-t border-slate-800 pt-2">
                     <label class="block text-[10px] font-semibold text-amber-400">Otomatik Yedek Sıklığı (Dakika)</label>
                     <input type="number" id="settingAutoBackupMinutes" min="0" placeholder="15" onchange="updateAutoBackupSetting()" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white text-xs">
                     <div class="text-[9px] text-slate-400" id="autoBackupStatusInfo">Dakika cinsinden süre girebilirsiniz.</div>
                 </div>
                 <div class="space-y-2 border-t border-slate-800 pt-2">
-                    <label class="block text-[10px] font-semibold text-emerald-400">📁 Dosya Olarak Yedekle (JSON)</label>
+                    <label class="block text-[10px] font-semibold text-emerald-400">📁 Dosya Olarak Yedekle (JSON / BIN)</label>
                     <div class="grid grid-cols-2 gap-2">
                         <button onclick="exportToJsonFile()" class="w-full bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 p-2.5 rounded-xl flex items-center justify-center font-medium border border-emerald-500/30"><i data-lucide="download" class="w-3.5 h-3.5 mr-1"></i> Dosya İndir</button>
-                        <label class="w-full bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 p-2.5 rounded-xl flex items-center justify-center font-medium border border-blue-500/30 cursor-pointer"><i data-lucide="upload" class="w-3.5 h-3.5 mr-1"></i> Dosya Seç<input type="file" id="jsonFileInput" accept=".json" onchange="importFromJsonFile(event)" class="hidden"></label>
+                        <label class="w-full bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 p-2.5 rounded-xl flex items-center justify-center font-medium border border-blue-500/30 cursor-pointer"><i data-lucide="upload" class="w-3.5 h-3.5 mr-1"></i> Dosya Seç<input type="file" id="jsonFileInput" accept="*/*" onchange="importFromJsonFile(event)" class="hidden"></label>
                     </div>
                 </div>
                 <button onclick="clearAllDataWithConfirmation()" class="w-full bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 p-2.5 rounded-xl flex items-center justify-center font-medium border border-rose-500/30 mt-2"><i data-lucide="trash-2" class="w-4 h-4 mr-1.5"></i> Tüm Verileri Sıfırla</button>
@@ -512,26 +496,36 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
     <script>
+        const DEFAULT_NAV_ORDER = ['notlar', 'islemler', 'gelir', 'gider'];
+        let navEditMode = false;
         let appData = {
             kasaLogs: [],
             cariLogs: [],
-            settings: { 
-                userName: "Metin GEL GÖR", 
-                theme: "dark", 
-                autoBackupInterval: "15", 
+            settings: {
+                userName: "Metin GEL GÖR",
+                theme: "dark",
+                autoBackupInterval: "15",
                 isPrivate: false,
+                showTransactionTime: true,
                 securityEnabled: true,
                 adminPwd: "m3444",
-                readonlyPwd: "3444"
+                readonlyPwd: "3444",
+                navOrder: [...DEFAULT_NAV_ORDER]
             }
         };
-        let summaryChart = null;
-        let selectedCariFirma = '';
-        let autoBackupTimer = null;
-        let sortField = 'tarih'; 
-        let sortDirection = 'desc'; 
+        let summaryChart = null, selectedCariFirma = '', autoBackupTimer = null;
+
+        function getCurrentTimeString() {
+            const now = new Date();
+            return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        }
+
+        function formatTimeFromId(idVal) {
+            if (!idVal) return "--:--";
+            const d = new Date(Number(idVal));
+            return isNaN(d.getTime()) ? "--:--" : `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        }
 
         document.addEventListener("DOMContentLoaded", () => {
             loadLocalData();
@@ -541,6 +535,7 @@
             initChart();
             applySettings();
             renderAll();
+            applyNavOrder();
             startAutoBackupTimer();
         });
 
@@ -550,10 +545,12 @@
                 try {
                     const parsed = JSON.parse(saved);
                     appData = { ...appData, ...parsed };
-                    if(!appData.settings) appData.settings = { userName: "Metin GEL GÖR", theme: "dark", autoBackupInterval: "15", isPrivate: false, securityEnabled: true, adminPwd: "m3444", readonlyPwd: "3444" };
-                    if(appData.settings.securityEnabled === undefined) appData.settings.securityEnabled = true;
-                    if(!appData.settings.adminPwd) appData.settings.adminPwd = "m3444";
-                    if(!appData.settings.readonlyPwd) appData.settings.readonlyPwd = "3444";
+                    if (!appData.settings) appData.settings = { userName: "Metin GEL GÖR", theme: "dark", autoBackupInterval: "15", isPrivate: false, showTransactionTime: true, securityEnabled: true, adminPwd: "m3444", readonlyPwd: "3444", navOrder: [...DEFAULT_NAV_ORDER] };
+                    if (appData.settings.showTransactionTime === undefined) appData.settings.showTransactionTime = true;
+                    if (appData.settings.securityEnabled === undefined) appData.settings.securityEnabled = true;
+                    if (!appData.settings.adminPwd) appData.settings.adminPwd = "m3444";
+                    if (!appData.settings.readonlyPwd) appData.settings.readonlyPwd = "3444";
+                    if (!Array.isArray(appData.settings.navOrder)) appData.settings.navOrder = [...DEFAULT_NAV_ORDER];
                 } catch (e) {}
             }
         }
@@ -563,29 +560,95 @@
             renderAll();
         }
 
+        function getNavOrder() {
+            const saved = appData.settings && Array.isArray(appData.settings.navOrder) ? appData.settings.navOrder : DEFAULT_NAV_ORDER;
+            const valid = saved.filter(id => DEFAULT_NAV_ORDER.includes(id));
+            DEFAULT_NAV_ORDER.forEach(id => { if (!valid.includes(id)) valid.push(id); });
+            return valid;
+        }
+
+        function applyNavOrder() {
+            const nav = document.querySelector('nav');
+            if (!nav) return;
+            getNavOrder().forEach(id => {
+                const btn = document.getElementById('nav-' + id);
+                if (btn) nav.appendChild(btn);
+            });
+            updateNavEditControls();
+        }
+
+        function toggleNavEditMode() {
+            if (currentUserRole !== 'admin') {
+                alert("Bu ayarı sadece yönetici değiştirebilir.");
+                document.getElementById('settingNavEditToggle').checked = false;
+                return;
+            }
+            navEditMode = document.getElementById('settingNavEditToggle').checked;
+            updateNavEditControls();
+        }
+
+        function updateNavEditControls() {
+            getNavOrder().forEach(id => {
+                const btn = document.getElementById('nav-' + id);
+                if (!btn) return;
+                let ctrl = btn.querySelector('.nav-reorder-ctrl');
+                if (navEditMode) {
+                    if (!ctrl) {
+                        ctrl = document.createElement('div');
+                        ctrl.className = 'nav-reorder-ctrl flex items-center gap-1 mt-0.5';
+                        ctrl.innerHTML = `<span onclick="moveNavItem(event, '${id}', -1)" class="px-1.5 py-0.5 rounded bg-indigo-600 text-white text-[9px] font-bold cursor-pointer">◀</span><span onclick="moveNavItem(event, '${id}', 1)" class="px-1.5 py-0.5 rounded bg-indigo-600 text-white text-[9px] font-bold cursor-pointer">▶</span>`;
+                        btn.appendChild(ctrl);
+                    }
+                } else if (ctrl) {
+                    ctrl.remove();
+                }
+            });
+        }
+
+        function moveNavItem(e, id, delta) {
+            e.stopPropagation();
+            const order = getNavOrder();
+            const idx = order.indexOf(id);
+            const targetIdx = idx + delta;
+            if (idx < 0 || targetIdx < 0 || targetIdx >= order.length) return;
+            [order[idx], order[targetIdx]] = [order[targetIdx], order[idx]];
+            appData.settings.navOrder = order;
+            saveData();
+            applyNavOrder();
+        }
+
+        function resetNavOrder() {
+            appData.settings.navOrder = [...DEFAULT_NAV_ORDER];
+            saveData();
+            applyNavOrder();
+        }
+
         function applySettings() {
             document.getElementById('headerTitle').innerText = (appData.settings.userName || "METİN").split(' ')[0].toUpperCase();
             document.getElementById('headerSubTitle').innerText = appData.settings.userName || "Metin GEL GÖR";
             document.getElementById('menuUserName').innerText = appData.settings.userName || "Metin GEL GÖR";
             document.getElementById('settingUserName').value = appData.settings.userName || "Metin GEL GÖR";
-            
+            document.getElementById('settingShowTimeToggle').checked = appData.settings.showTransactionTime !== false;
+            document.getElementById('settingNavEditToggle').checked = navEditMode;
             document.getElementById('settingSecurityToggle').checked = appData.settings.securityEnabled;
             document.getElementById('settingAdminPwd').value = appData.settings.adminPwd;
             document.getElementById('settingReadonlyPwd').value = appData.settings.readonlyPwd;
-
             const body = document.getElementById('appBody');
-            if (appData.settings.theme === 'light') {
-                body.classList.remove('dark-mode'); body.classList.add('light-mode');
-            } else {
-                body.classList.remove('light-mode'); body.classList.add('dark-mode');
-            }
+            if (appData.settings.theme === 'light') { body.classList.remove('dark-mode'); body.classList.add('light-mode'); }
+            else { body.classList.remove('light-mode'); body.classList.add('dark-mode'); }
             document.getElementById('settingTheme').value = appData.settings.theme || 'dark';
             document.getElementById('settingAutoBackupMinutes').value = appData.settings.autoBackupInterval || '15';
             updatePrivacyUI();
         }
 
+        function updateDisplaySettings() {
+            if (currentUserRole !== 'admin') { alert("Bu ayarları sadece yönetici değiştirebilir."); return; }
+            appData.settings.showTransactionTime = document.getElementById('settingShowTimeToggle').checked;
+            saveData();
+        }
+
         function updateSecuritySettings() {
-            if(currentUserRole !== 'admin') { alert("Bu ayarları sadece yönetici değiştirebilir."); return; }
+            if (currentUserRole !== 'admin') { alert("Bu ayarları sadece yönetici değiştirebilir."); return; }
             appData.settings.securityEnabled = document.getElementById('settingSecurityToggle').checked;
             appData.settings.adminPwd = document.getElementById('settingAdminPwd').value.trim() || "m3444";
             appData.settings.readonlyPwd = document.getElementById('settingReadonlyPwd').value.trim() || "3444";
@@ -607,33 +670,17 @@
 
         function updatePrivacyUI() {
             const isPrivate = appData.settings.isPrivate;
-            const privacyBtn = document.getElementById('privacyBtn');
-            privacyBtn.innerHTML = isPrivate ? '<i data-lucide="eye-off" class="w-4 h-4 text-rose-400"></i>' : '<i data-lucide="eye" class="w-4 h-4 text-emerald-400"></i>';
+            document.getElementById('privacyBtn').innerHTML = isPrivate ? '<i data-lucide="eye-off" class="w-4 h-4 text-rose-400"></i>' : '<i data-lucide="eye" class="w-4 h-4 text-emerald-400"></i>';
             document.querySelectorAll('.maskable-amount').forEach(el => {
-                if (isPrivate) {
-                    el.dataset.original = el.dataset.original || el.innerText;
-                    el.innerText = "*** ₺";
-                } else {
-                    if (el.dataset.original) el.innerText = el.dataset.original;
-                }
+                if (isPrivate) { el.dataset.original = el.dataset.original || el.innerText; el.innerText = "*** ₺"; }
+                else if (el.dataset.original) el.innerText = el.dataset.original;
             });
             lucide.createIcons();
         }
 
-        function updateProfileName() {
-            const val = document.getElementById('settingUserName').value.trim();
-            if (val) { appData.settings.userName = val; saveData(); applySettings(); }
-        }
-
-        function changeTheme() {
-            appData.settings.theme = document.getElementById('settingTheme').value;
-            saveData(); applySettings();
-        }
-
-        function updateAutoBackupSetting() {
-            appData.settings.autoBackupInterval = document.getElementById('settingAutoBackupMinutes').value;
-            saveData(); startAutoBackupTimer();
-        }
+        function updateProfileName() { const val = document.getElementById('settingUserName').value.trim(); if (val) { appData.settings.userName = val; saveData(); applySettings(); } }
+        function changeTheme() { appData.settings.theme = document.getElementById('settingTheme').value; saveData(); applySettings(); }
+        function updateAutoBackupSetting() { appData.settings.autoBackupInterval = document.getElementById('settingAutoBackupMinutes').value; saveData(); startAutoBackupTimer(); }
 
         function startAutoBackupTimer() {
             if (autoBackupTimer) clearInterval(autoBackupTimer);
@@ -648,26 +695,17 @@
         function openMenuModal() {
             calculateCiroSummary();
             updateCariPreview();
-            
             const todayStr = new Date().toISOString().split('T')[0];
-            if(!document.getElementById('kasaRaporBaslangic').value) {
-                document.getElementById('kasaRaporBaslangic').value = todayStr;
-            }
-            if(!document.getElementById('kasaRaporBitis').value) {
-                document.getElementById('kasaRaporBitis').value = todayStr;
-            }
+            if (!document.getElementById('kasaRaporBaslangic').value) document.getElementById('kasaRaporBaslangic').value = todayStr;
+            if (!document.getElementById('kasaRaporBitis').value) document.getElementById('kasaRaporBitis').value = todayStr;
             updateKasaRaporPreview();
-
             document.getElementById('menuKayitSayisi').innerText = appData.kasaLogs.length + ' Kasa / ' + appData.cariLogs.length + ' Cari';
             document.getElementById('menuModal').classList.remove('hidden');
             document.getElementById('menuModal').classList.add('flex');
             lucide.createIcons();
         }
 
-        function closeMenuModal() {
-            document.getElementById('menuModal').classList.add('hidden');
-            document.getElementById('menuModal').classList.remove('flex');
-        }
+        function closeMenuModal() { document.getElementById('menuModal').classList.add('hidden'); document.getElementById('menuModal').classList.remove('flex'); }
 
         function calculateCiroSummary() {
             const today = new Date().toISOString().split('T')[0];
@@ -688,100 +726,42 @@
         }
 
         function updateKasaRaporPreview() {
-            const baslangic = document.getElementById('kasaRaporBaslangic').value;
-            const bitis = document.getElementById('kasaRaporBitis').value;
-            const contentEl = document.getElementById('kasaRaporPreviewContent');
-            
-            if (!baslangic || !bitis) {
-                contentEl.innerHTML = '<div class="text-center text-slate-500 py-2">Lütfen başlangıç ve bitiş tarihi seçin.</div>';
-                return;
-            }
-
-            const d1 = new Date(baslangic);
-            const d2 = new Date(bitis);
-            if (d1 > d2) {
-                contentEl.innerHTML = '<div class="text-center text-rose-400 py-2">Başlangıç tarihi bitiş tarihinden büyük olamaz.</div>';
-                return;
-            }
-
-            const diffTime = Math.abs(d2 - d1);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-            let nakitSatis = 0, kartSatis = 0;
-            let nakitOdeme = 0, kartOdeme = 0;
-
+            const baslangic = document.getElementById('kasaRaporBaslangic').value, bitis = document.getElementById('kasaRaporBitis').value, contentEl = document.getElementById('kasaRaporPreviewContent');
+            if (!baslangic || !bitis) { contentEl.innerHTML = '<div class="text-center text-slate-500 py-2">Lütfen başlangıç ve bitiş tarihi seçin.</div>'; return; }
+            const d1 = new Date(baslangic), d2 = new Date(bitis);
+            if (d1 > d2) { contentEl.innerHTML = '<div class="text-center text-rose-400 py-2">Başlangıç tarihi bitiş tarihinden büyük olamaz.</div>'; return; }
+            const diffDays = Math.ceil(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+            let nakitSatis = 0, kartSatis = 0, nakitOdeme = 0, kartOdeme = 0;
             appData.kasaLogs.forEach(log => {
                 if (log.tarih >= baslangic && log.tarih <= bitis) {
-                    if (log.tip === 'satis') {
-                        nakitSatis += (log.nakit || 0);
-                        kartSatis += (log.kredi || 0);
-                    } else if (log.tip === 'odeme') {
-                        nakitOdeme += (log.nakit || 0);
-                        kartOdeme += (log.kredi || 0);
-                    }
+                    if (log.tip === 'satis') { nakitSatis += (log.nakit || 0); kartSatis += (log.kredi || 0); }
+                    else if (log.tip === 'odeme') { nakitOdeme += (log.nakit || 0); kartOdeme += (log.kredi || 0); }
                 }
             });
-
-            contentEl.innerHTML = `
-                <div class="space-y-1.5 text-[11px]">
-                    <div class="flex justify-between items-center bg-[#11222b] px-2 py-1.5 rounded-xl border border-slate-800">
-                        <span class="text-slate-400 font-semibold">Seçili Gün Aralığı:</span>
-                        <span class="font-extrabold text-amber-400 text-xs">${diffDays} Gün</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-1.5">
-                        <div class="bg-[#11222b] p-2 rounded-xl border border-slate-800">
-                            <div class="text-[9px] text-emerald-400 font-semibold">NAKİT SATIŞ</div>
-                            <div class="text-xs font-bold text-white maskable-amount">${nakitSatis.toFixed(2)} ₺</div>
-                        </div>
-                        <div class="bg-[#11222b] p-2 rounded-xl border border-slate-800">
-                            <div class="text-[9px] text-blue-400 font-semibold">KART / KREDİ SATIŞ</div>
-                            <div class="text-xs font-bold text-white maskable-amount">${kartSatis.toFixed(2)} ₺</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-1.5">
-                        <div class="bg-[#11222b] p-2 rounded-xl border border-slate-800">
-                            <div class="text-[9px] text-rose-400 font-semibold">NAKİT ÖDEME</div>
-                            <div class="text-xs font-bold text-white maskable-amount">${nakitOdeme.toFixed(2)} ₺</div>
-                        </div>
-                        <div class="bg-[#11222b] p-2 rounded-xl border border-slate-800">
-                            <div class="text-[9px] text-rose-400 font-semibold">KART / KREDİ ÖDEME</div>
-                            <div class="text-xs font-bold text-white maskable-amount">${kartOdeme.toFixed(2)} ₺</div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            contentEl.innerHTML = `<div class="space-y-1.5 text-[11px]"><div class="flex justify-between items-center bg-[#11222b] px-2 py-1.5 rounded-xl border border-slate-800"><span class="text-slate-400 font-semibold">Seçili Gün Aralığı:</span><span class="font-extrabold text-amber-400 text-xs">${diffDays} Gün</span></div><div class="grid grid-cols-2 gap-1.5"><div class="bg-[#11222b] p-2 rounded-xl border border-slate-800"><div class="text-[9px] text-emerald-400 font-semibold">NAKİT SATIŞ</div><div class="text-xs font-bold text-white maskable-amount">${nakitSatis.toFixed(2)} ₺</div></div><div class="bg-[#11222b] p-2 rounded-xl border border-slate-800"><div class="text-[9px] text-blue-400 font-semibold">KART / KREDİ SATIŞ</div><div class="text-xs font-bold text-white maskable-amount">${kartSatis.toFixed(2)} ₺</div></div></div><div class="grid grid-cols-2 gap-1.5"><div class="bg-[#11222b] p-2 rounded-xl border border-slate-800"><div class="text-[9px] text-rose-400 font-semibold">NAKİT ÖDEME</div><div class="text-xs font-bold text-white maskable-amount">${nakitOdeme.toFixed(2)} ₺</div></div><div class="bg-[#11222b] p-2 rounded-xl border border-slate-800"><div class="text-[9px] text-rose-400 font-semibold">KART / KREDİ ÖDEME</div><div class="text-xs font-bold text-white maskable-amount">${kartOdeme.toFixed(2)} ₺</div></div></div></div>`;
             updatePrivacyUI();
         }
 
         function getFilteredCariBalances() {
-            const baslangic = document.getElementById('cariRaporBaslangic').value;
-            const bitis = document.getElementById('cariRaporBitis').value;
+            const baslangic = document.getElementById('cariRaporBaslangic').value, bitis = document.getElementById('cariRaporBitis').value;
             let cariBakiyeler = {};
             appData.cariLogs.forEach(log => {
                 if (baslangic && log.tarih < baslangic) return;
                 if (bitis && log.tarih > bitis) return;
-                if(!cariBakiyeler[log.firma]) cariBakiyeler[log.firma] = 0;
-                if(log.tip === 'alis') cariBakiyeler[log.firma] -= log.tutar;
-                else if(log.tip === 'odeme') cariBakiyeler[log.firma] += log.tutar;
+                if (!cariBakiyeler[log.firma]) cariBakiyeler[log.firma] = 0;
+                if (log.tip === 'alis') cariBakiyeler[log.firma] -= log.tutar;
+                else if (log.tip === 'odeme') cariBakiyeler[log.firma] += log.tutar;
             });
             return cariBakiyeler;
         }
 
         function updateCariPreview() {
-            const cariBakiyeler = getFilteredCariBalances();
-            const firmalar = Object.keys(cariBakiyeler);
-            const previewContainer = document.getElementById('cariRaporPreviewContent');
-            const previewToplamDurum = document.getElementById('previewToplamDurum');
+            const cariBakiyeler = getFilteredCariBalances(), firmalar = Object.keys(cariBakiyeler), previewContainer = document.getElementById('cariRaporPreviewContent'), previewToplamDurum = document.getElementById('previewToplamDurum');
             previewContainer.innerHTML = '';
             let toplamBorcAlacak = 0;
-            if (firmalar.length === 0) {
-                previewContainer.innerHTML = '<div class="text-center text-slate-500 py-3">Bu tarih aralığında cari işlem bulunamadı.</div>';
-                previewToplamDurum.innerText = 'Toplam: 0,00 ₺';
-                return;
-            }
+            if (firmalar.length === 0) { previewContainer.innerHTML = '<div class="text-center text-slate-500 py-3">Bu tarih aralığında cari işlem bulunamadı.</div>'; previewToplamDurum.innerText = 'Toplam: 0,00 ₺'; return; }
             firmalar.forEach(firma => {
-                const bakiye = cariBakiyeler[firma];
-                toplamBorcAlacak += bakiye;
+                const bakiye = cariBakiyeler[firma]; toplamBorcAlacak += bakiye;
                 const row = document.createElement('div');
                 row.className = 'flex justify-between items-center bg-[#11222b] px-2.5 py-1.5 rounded-xl border border-slate-800';
                 row.innerHTML = '<span class="font-medium text-slate-200">' + firma + '</span><span class="font-bold ' + (bakiye < 0 ? 'text-rose-400' : 'text-emerald-400') + '">' + bakiye.toFixed(2) + ' ₺</span>';
@@ -792,31 +772,25 @@
         }
 
         function shareCariOzetWhatsapp() {
-            const cariBakiyeler = getFilteredCariBalances();
-            const firmalar = Object.keys(cariBakiyeler);
+            const cariBakiyeler = getFilteredCariBalances(), firmalar = Object.keys(cariBakiyeler);
             if (firmalar.length === 0) { alert("Kayıtlı cari işlem bulunmuyor."); return; }
             let detayListesi = "", toplam = 0;
-            firmalar.forEach((f, i) => {
-                const b = cariBakiyeler[f]; toplam += b;
-                detayListesi += (i + 1) + ". *" + f + "*: " + b.toFixed(2) + " ₺\n";
-            });
+            firmalar.forEach((f, i) => { const b = cariBakiyeler[f]; toplam += b; detayListesi += (i + 1) + ". *" + f + "*: " + b.toFixed(2) + " ₺\n"; });
             window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent("📋 *CARİ ÖZETİ*\n" + detayListesi + "\nToplam: " + toplam.toFixed(2) + " ₺"), '_blank');
         }
 
         function exportCariOzetExcel() {
             if (typeof XLSX === 'undefined') { alert("Excel modülü yüklenemedi."); return; }
             const wb = XLSX.utils.book_new();
-            const rows = appData.cariLogs.map(c => ({ "Tarih": c.tarih, "Firma": c.firma, "Tip": c.tip, "Tutar": c.tutar, "Açıklama": c.aciklama }));
+            const rows = appData.cariLogs.map(c => ({ "Tarih": c.tarih, "Saat": c.saat || formatTimeFromId(c.id), "Firma": c.firma, "Tip": c.tip, "Tutar": c.tutar, "Açıklama": c.aciklama }));
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Cari Raporu");
             XLSX.writeFile(wb, "Cari_Raporu.xlsx");
         }
 
         function exportCariOzetCsv() {
-            let csv = "\uFEFFTarih;Firma;Tip;Tutar;Açıklama\n";
-            appData.cariLogs.forEach(c => { csv += c.tarih + ";" + c.firma + ";" + c.tip + ";" + c.tutar + ";" + c.aciklama + "\n"; });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = "Cari_Rapor.csv"; a.click();
+            let csv = "\uFEFFTarih;Saat;Firma;Tip;Tutar;Açıklama\n";
+            appData.cariLogs.forEach(c => { csv += c.tarih + ";" + (c.saat || formatTimeFromId(c.id)) + ";" + c.firma + ";" + c.tip + ";" + c.tutar + ";" + c.aciklama + "\n"; });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = "Cari_Rapor.csv"; a.click();
         }
 
         function exportToExcel() {
@@ -828,25 +802,20 @@
         }
 
         function exportToCsv() {
-            let csv = "\uFEFFTip;Tarih;Açıklama;Tutar\n";
-            appData.kasaLogs.forEach(l => { csv += "Kasa;" + l.tarih + ";" + l.aciklama + ";" + ((l.nakit||0)+(l.kredi||0)) + "\n"; });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = "Tum_Veriler.csv"; a.click();
+            let csv = "\uFEFFTip;Tarih;Saat;Açıklama;Tutar\n";
+            appData.kasaLogs.forEach(l => { csv += "Kasa;" + l.tarih + ";" + (l.saat || formatTimeFromId(l.id)) + ";" + l.aciklama + ";" + ((l.nakit||0)+(l.kredi||0)) + "\n"; });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = "Tum_Veriler.csv"; a.click();
         }
 
         function exportToJsonFile() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
-            const a = document.createElement('a'); a.href = dataStr; a.download = "yedek.json"; a.click();
+            const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData)); a.download = "yedek.json"; a.click();
         }
 
         function importFromJsonFile(e) {
             const reader = new FileReader();
             if (e.target.files[0]) {
                 reader.readAsText(e.target.files[0], "UTF-8");
-                reader.onload = (event) => {
-                    try { appData = JSON.parse(event.target.result); saveData(); applySettings(); alert("Yüklendi!"); closeSettings(); } catch(err) { alert("Hata!"); }
-                };
+                reader.onload = (event) => { try { appData = JSON.parse(event.target.result); saveData(); applySettings(); applyNavOrder(); alert("Yüklendi!"); closeSettings(); } catch (err) { alert("Hata!"); } };
             }
         }
 
@@ -855,17 +824,11 @@
         }
 
         function switchView(viewId) {
-            ['islemler', 'gelir', 'gider', 'notlar', 'cariEkle'].forEach(id => {
-                document.getElementById('view-' + id).classList.add('hidden');
-            });
+            ['islemler', 'gelir', 'gider', 'notlar', 'cariEkle'].forEach(id => { document.getElementById('view-' + id).classList.add('hidden'); });
             document.getElementById('view-' + viewId).classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-btn').forEach(btn => { 
-                btn.classList.remove('text-emerald-400');
-                btn.classList.add('text-slate-400');
-            });
-            
-            if(viewId === 'gider') populateCariDropdown();
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) contentArea.scrollTop = 0;
+            if (viewId === 'gider') populateCariDropdown();
             lucide.createIcons();
         }
 
@@ -886,40 +849,32 @@
 
         function handleSatisSubmit(e) {
             e.preventDefault();
-            if(currentUserRole === 'readonly') { alert("Yetkiniz yok (Sadece Okuma Modu)."); return; }
-            const tarih = document.getElementById('satisTarih').value;
-            const nakit = parseFloat(document.getElementById('satisNakit').value) || 0;
-            const kredi = parseFloat(document.getElementById('satisKredi').value) || 0;
+            if (currentUserRole === 'readonly') { alert("Yetkiniz yok (Sadece Okuma Modu)."); return; }
+            const tarih = document.getElementById('satisTarih').value, saat = getCurrentTimeString(), nakit = parseFloat(document.getElementById('satisNakit').value) || 0, kredi = parseFloat(document.getElementById('satisKredi').value) || 0;
             if (nakit <= 0 && kredi <= 0) { alert("Tutar giriniz."); return; }
-            appData.kasaLogs.push({ id: Date.now(), tarih, tip: 'satis', aciklama: 'Günlük Satış', nakit, kredi });
+            appData.kasaLogs.push({ id: Date.now(), tarih, saat, tip: 'satis', aciklama: 'Günlük Satış', nakit, kredi });
             document.getElementById('satisNakit').value = ''; document.getElementById('satisKredi').value = '';
             saveData(); switchView('notlar');
         }
 
         function handleOdemeSubmit(e) {
             e.preventDefault();
-            if(currentUserRole === 'readonly') { alert("Yetkiniz yok (Sadece Okuma Modu)."); return; }
-            const tarih = document.getElementById('odemeTarih').value;
-            const selectedCari = document.getElementById('odemeCariSelect').value;
-            const firma = document.getElementById('odemeFirma').value.trim();
-            const tutar = parseFloat(document.getElementById('odemeTutar').value) || 0;
-            const odemeTur = document.getElementById('odemeTur').value;
+            if (currentUserRole === 'readonly') { alert("Yetkiniz yok (Sadece Okuma Modu)."); return; }
+            const tarih = document.getElementById('odemeTarih').value, saat = getCurrentTimeString(), selectedCari = document.getElementById('odemeCariSelect').value, firma = document.getElementById('odemeFirma').value.trim(), tutar = parseFloat(document.getElementById('odemeTutar').value) || 0, odemeTur = document.getElementById('odemeTur').value;
             if (!firma || tutar <= 0) return;
-            appData.kasaLogs.push({ id: Date.now(), tarih, tip: 'odeme', aciklama: 'Gider: ' + firma + ' (' + odemeTur + ')', nakit: odemeTur === 'Nakit' ? tutar : 0, kredi: odemeTur === 'Kredi Kartı' ? tutar : 0 });
-            if (selectedCari !== '__HARICI__') { appData.cariLogs.push({ id: Date.now() + 1, tarih, firma: selectedCari, tip: 'odeme', tutar, aciklama: 'Ödeme (' + odemeTur + ')' }); }
+            const nowId = Date.now();
+            appData.kasaLogs.push({ id: nowId, tarih, saat, tip: 'odeme', aciklama: 'Gider: ' + firma + ' (' + odemeTur + ')', nakit: odemeTur === 'Nakit' ? tutar : 0, kredi: odemeTur === 'Kredi Kartı' ? tutar : 0 });
+            if (selectedCari !== '__HARICI__') appData.cariLogs.push({ id: nowId + 1, tarih, saat, firma: selectedCari, tip: 'odeme', tutar, aciklama: 'Ödeme (' + odemeTur + ')' });
             document.getElementById('odemeFirma').value = ''; document.getElementById('odemeTutar').value = '';
             saveData(); switchView('notlar');
         }
 
         function handleCariSubmit(e) {
             e.preventDefault();
-            if(currentUserRole === 'readonly') { alert("Yetkiniz yok (Sadece Okuma Modu)."); return; }
-            const firma = document.getElementById('cariFirma').value.trim();
-            const tip = document.getElementById('cariIslemTip').value;
-            const tutar = parseFloat(document.getElementById('cariTutar').value) || 0;
-            const aciklama = document.getElementById('cariAciklama').value.trim() || 'Açılış';
+            if (currentUserRole === 'readonly') { alert("Yetkiniz yok (Sadece Okuma Modu)."); return; }
+            const firma = document.getElementById('cariFirma').value.trim(), tip = document.getElementById('cariIslemTip').value, tutar = parseFloat(document.getElementById('cariTutar').value) || 0, aciklama = document.getElementById('cariAciklama').value.trim() || 'Açılış';
             if (!firma) return;
-            appData.cariLogs.push({ id: Date.now(), tarih: new Date().toISOString().split('T')[0], firma, tip, tutar, aciklama });
+            appData.cariLogs.push({ id: Date.now(), tarih: new Date().toISOString().split('T')[0], saat: getCurrentTimeString(), firma, tip, tutar, aciklama });
             document.getElementById('cariFirma').value = ''; document.getElementById('cariTutar').value = ''; document.getElementById('cariAciklama').value = '';
             saveData(); switchView('islemler');
         }
@@ -933,55 +888,45 @@
             document.getElementById('cariDetailModal').classList.add('flex');
         }
 
-        function closeCariDetail() {
-            document.getElementById('cariDetailModal').classList.add('hidden');
-            document.getElementById('cariDetailModal').classList.remove('flex');
-        }
+        function closeCariDetail() { document.getElementById('cariDetailModal').classList.add('hidden'); document.getElementById('cariDetailModal').classList.remove('flex'); }
 
         function renderCariModalLogs() {
             const logsContainer = document.getElementById('modalCariLogs');
             logsContainer.innerHTML = '';
             let bakiye = 0;
-            appData.cariLogs.filter(l => l.firma === selectedCariFirma).forEach(log => {
-                if(log.tip === 'alis') bakiye -= log.tutar; else if(log.tip === 'odeme') bakiye += log.tutar;
+            const showTime = appData.settings.showTransactionTime !== false;
+            appData.cariLogs.filter(l => l.firma === selectedCariFirma).slice().reverse().forEach(log => {
+                if (log.tip === 'alis') bakiye -= log.tutar; else if (log.tip === 'odeme') bakiye += log.tutar;
                 const item = document.createElement('div');
                 item.className = "flex justify-between items-center bg-[#09141a] p-2 rounded-xl border border-slate-800 text-[10px]";
-                
-                let deleteBtnHtml = currentUserRole === 'admin' ? '<button onclick="deleteSingleCariLog(' + log.id + ')" class="text-rose-500 font-bold px-1">✕</button>' : '';
-
-                item.innerHTML = '<div><div class="text-slate-200 font-medium">' + log.aciklama + '</div><div class="text-slate-400">' + log.tarih + '</div></div><div class="flex items-center space-x-2"><span class="font-bold ' + (log.tip === 'alis' ? 'text-rose-400' : 'text-emerald-400') + '">' + log.tutar.toFixed(2) + ' ₺</span>' + deleteBtnHtml + '</div>';
+                const saatText = showTime ? ` • ${log.saat || formatTimeFromId(log.id)}` : '';
+                const deleteBtnHtml = currentUserRole === 'admin' ? '<button onclick="deleteSingleCariLog(' + log.id + ')" class="text-rose-500 font-bold px-1">✕</button>' : '';
+                item.innerHTML = '<div><div class="text-slate-200 font-medium">' + log.aciklama + '</div><div class="text-slate-400">' + log.tarih + saatText + '</div></div><div class="flex items-center space-x-2"><span class="font-bold ' + (log.tip === 'alis' ? 'text-rose-400' : 'text-emerald-400') + '">' + log.tutar.toFixed(2) + ' ₺</span>' + deleteBtnHtml + '</div>';
                 logsContainer.appendChild(item);
             });
             const bEl = document.getElementById('modalCariBakiye');
-            bEl.innerText = bakiye.toFixed(2) + ' ₺'; bEl.className = 'font-bold maskable-amount ' + (bakiye < 0 ? 'text-rose-400' : 'text-emerald-400');
+            bEl.innerText = bakiye.toFixed(2) + ' ₺';
+            bEl.className = 'font-bold maskable-amount ' + (bakiye < 0 ? 'text-rose-400' : 'text-emerald-400');
             updatePrivacyUI();
         }
 
         function handleCariHareketSubmit(e) {
             e.preventDefault();
-            if(currentUserRole === 'readonly') { alert("Yetkiniz yok."); return; }
-            const tip = document.getElementById('modalHareketTip').value;
-            const tutar = parseFloat(document.getElementById('modalHareketTutar').value) || 0;
-            const aciklama = document.getElementById('modalHareketAciklama').value.trim() || (tip === 'alis' ? 'Mal Alışı' : 'Ödeme');
-            if(tutar <= 0) return;
-            appData.cariLogs.push({ id: Date.now(), tarih: new Date().toISOString().split('T')[0], firma: selectedCariFirma, tip, tutar, aciklama });
-            if(tip === 'odeme') { appData.kasaLogs.push({ id: Date.now() + 1, tarih: new Date().toISOString().split('T')[0], tip: 'odeme', aciklama: 'Cari Ödeme: ' + selectedCariFirma, nakit: tutar, kredi: 0 }); }
+            if (currentUserRole === 'readonly') { alert("Yetkiniz yok."); return; }
+            const tip = document.getElementById('modalHareketTip').value, tutar = parseFloat(document.getElementById('modalHareketTutar').value) || 0, aciklama = document.getElementById('modalHareketAciklama').value.trim() || (tip === 'alis' ? 'Mal Alışı' : 'Ödeme');
+            if (tutar <= 0) return;
+            const nowId = Date.now(), nowStr = new Date().toISOString().split('T')[0], saat = getCurrentTimeString();
+            appData.cariLogs.push({ id: nowId, tarih: nowStr, saat, firma: selectedCariFirma, tip, tutar, aciklama });
+            if (tip === 'odeme') appData.kasaLogs.push({ id: nowId + 1, tarih: nowStr, saat, tip: 'odeme', aciklama: 'Cari Ödeme: ' + selectedCariFirma, nakit: tutar, kredi: 0 });
             document.getElementById('modalHareketTutar').value = ''; document.getElementById('modalHareketAciklama').value = '';
             saveData(); renderCariModalLogs();
         }
 
-        function deleteSingleCariLog(id) {
-            if(currentUserRole === 'readonly') return;
-            if (confirm("Silinsin mi?")) { appData.cariLogs = appData.cariLogs.filter(l => l.id !== id); saveData(); renderCariModalLogs(); }
-        }
-
-        function deleteEntireCari() {
-            if(currentUserRole === 'readonly') return;
-            if(confirm("Tüm cari silinsin mi?")) { appData.cariLogs = appData.cariLogs.filter(l => l.firma !== selectedCariFirma); saveData(); closeCariDetail(); }
-        }
+        function deleteSingleCariLog(id) { if (currentUserRole !== 'readonly' && confirm("Silinsin mi?")) { appData.cariLogs = appData.cariLogs.filter(l => l.id !== id); saveData(); renderCariModalLogs(); } }
+        function deleteEntireCari() { if (currentUserRole !== 'readonly' && confirm("Tüm cari silinsin mi?")) { appData.cariLogs = appData.cariLogs.filter(l => l.firma !== selectedCariFirma); saveData(); closeCariDetail(); } }
 
         function openEditKasaModal(id) {
-            if(currentUserRole === 'readonly') return;
+            if (currentUserRole === 'readonly') return;
             const log = appData.kasaLogs.find(l => l.id === id);
             if (!log) return;
             document.getElementById('editKasaId').value = log.id;
@@ -992,16 +937,12 @@
             document.getElementById('editKasaModal').classList.add('flex');
         }
 
-        function closeEditKasaModal() {
-            document.getElementById('editKasaModal').classList.add('hidden');
-            document.getElementById('editKasaModal').classList.remove('flex');
-        }
+        function closeEditKasaModal() { document.getElementById('editKasaModal').classList.add('hidden'); document.getElementById('editKasaModal').classList.remove('flex'); }
 
         function saveKasaEdit(e) {
             e.preventDefault();
-            if(currentUserRole === 'readonly') return;
-            const id = parseInt(document.getElementById('editKasaId').value);
-            const log = appData.kasaLogs.find(l => l.id === id);
+            if (currentUserRole === 'readonly') return;
+            const log = appData.kasaLogs.find(l => l.id === parseInt(document.getElementById('editKasaId').value));
             if (log) {
                 log.aciklama = document.getElementById('editKasaAciklama').value;
                 log.nakit = parseFloat(document.getElementById('editKasaNakit').value) || 0;
@@ -1010,21 +951,8 @@
             }
         }
 
-        function deleteKasaLog(id) {
-            if(currentUserRole === 'readonly') return;
-            if (confirm("Silinsin mi?")) { appData.kasaLogs = appData.kasaLogs.filter(item => item.id !== id); saveData(); }
-        }
-
-        function deleteCariLogFromMaster(id) {
-            if(currentUserRole === 'readonly') return;
-            if (confirm("Silinsin mi?")) { appData.cariLogs = appData.cariLogs.filter(item => item.id !== id); saveData(); }
-        }
-
-        function toggleSort(field) {
-            sortDirection = (sortField === field && sortDirection === 'asc') ? 'desc' : 'asc';
-            sortField = field;
-            renderAll();
-        }
+        function deleteKasaLog(id) { if (currentUserRole !== 'readonly' && confirm("Silinsin mi?")) { appData.kasaLogs = appData.kasaLogs.filter(item => item.id !== id); saveData(); } }
+        function deleteCariLogFromMaster(id) { if (currentUserRole !== 'readonly' && confirm("Silinsin mi?")) { appData.cariLogs = appData.cariLogs.filter(item => item.id !== id); saveData(); } }
 
         function renderAll() {
             let nGelir = 0, kGelir = 0, nGider = 0, kGider = 0;
@@ -1042,25 +970,17 @@
 
             let cariBakiyeler = {};
             appData.cariLogs.forEach(log => {
-                if(!cariBakiyeler[log.firma]) cariBakiyeler[log.firma] = 0;
-                if(log.tip === 'alis') cariBakiyeler[log.firma] -= log.tutar; else if(log.tip === 'odeme') cariBakiyeler[log.firma] += log.tutar;
+                if (!cariBakiyeler[log.firma]) cariBakiyeler[log.firma] = 0;
+                if (log.tip === 'alis') cariBakiyeler[log.firma] -= log.tutar; else if (log.tip === 'odeme') cariBakiyeler[log.firma] += log.tutar;
             });
             const cariListEl = document.getElementById('cariHesaplarListesi');
             cariListEl.innerHTML = '';
             const firmalar = Object.keys(cariBakiyeler);
-            if(firmalar.length === 0) {
-                cariListEl.innerHTML = `
-                    <div class="text-center py-6 px-4 bg-[#11222b] rounded-2xl border border-slate-800 shadow-lg space-y-2">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400">
-                            <i data-lucide="file-text" class="w-5 h-5"></i>
-                        </div>
-                        <div class="text-xs font-bold text-slate-300">Kayıtlı cari firma yok.</div>
-                        <div class="text-[9px] text-slate-400">Yeni cari ekleyerek işlem yapmaya başlayın.</div>
-                    </div>`;
+            if (firmalar.length === 0) {
+                cariListEl.innerHTML = `<div class="text-center py-6 px-4 bg-[#11222b] rounded-2xl border border-slate-800 shadow-lg space-y-2"><div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400"><i data-lucide="file-text" class="w-5 h-5"></i></div><div class="text-xs font-bold text-slate-300">Kayıtlı cari firma yok.</div><div class="text-[9px] text-slate-400">Yeni cari ekleyerek işlem yapmaya başlayın.</div></div>`;
             } else {
                 firmalar.forEach(firma => {
-                    const bakiye = cariBakiyeler[firma];
-                    const div = document.createElement('div');
+                    const bakiye = cariBakiyeler[firma], div = document.createElement('div');
                     div.className = "flex justify-between items-center bg-[#11222b] hover:bg-[#162a35] cursor-pointer px-3 py-2.5 rounded-2xl border border-slate-800 shadow-sm transition";
                     div.onclick = () => openCariDetail(firma);
                     div.innerHTML = '<div class="flex items-center space-x-2"><div class="w-6 h-6 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400"><i data-lucide="chevron-right" class="w-3 h-3"></i></div><span class="text-xs font-bold text-slate-100">' + firma + '</span></div><span class="text-xs font-extrabold ' + (bakiye < 0 ? 'text-rose-400' : 'text-emerald-400') + '">' + bakiye.toFixed(2) + ' ₺</span>';
@@ -1068,60 +988,30 @@
                 });
             }
 
-            document.getElementById('sortIconTarih').innerText = sortField === 'tarih' ? (sortDirection === 'asc' ? ' ▲' : ' ▼') : '';
-            document.getElementById('sortIconTutar').innerText = sortField === 'tutar' ? (sortDirection === 'asc' ? ' ▲' : ' ▼') : '';
-
             let unifiedLogs = [];
-            appData.kasaLogs.forEach(l => {
-                unifiedLogs.push({ id: 'kasa_' + l.id, originalId: l.id, source: 'kasa', tarih: l.tarih, tip: l.tip, baslik: l.aciklama, nakit: l.nakit || 0, kredi: l.kredi || 0, tutar: (l.nakit || 0) + (l.kredi || 0) });
-            });
-            appData.cariLogs.forEach(c => {
-                unifiedLogs.push({ id: 'cari_' + c.id, originalId: c.id, source: 'cari', tarih: c.tarih, tip: c.tip, baslik: c.firma + ' — ' + (c.aciklama || (c.tip === 'alis' ? 'Mal Alışı' : 'Ödeme')), nakit: 0, kredi: 0, tutar: c.tutar || 0 });
-            });
+            appData.kasaLogs.forEach(l => unifiedLogs.push({ id: 'kasa_' + l.id, sortOrder: Number(l.id) || 0, originalId: l.id, source: 'kasa', tarih: l.tarih, saat: l.saat || formatTimeFromId(l.id), tip: l.tip, baslik: l.aciklama, nakit: l.nakit || 0, kredi: l.kredi || 0, tutar: (l.nakit || 0) + (l.kredi || 0) }));
+            appData.cariLogs.forEach(c => unifiedLogs.push({ id: 'cari_' + c.id, sortOrder: Number(c.id) || 0, originalId: c.id, source: 'cari', tarih: c.tarih, saat: c.saat || formatTimeFromId(c.id), tip: c.tip, baslik: c.firma + ' — ' + (c.aciklama || (c.tip === 'alis' ? 'Mal Alışı' : 'Ödeme')), nakit: 0, kredi: 0, tutar: c.tutar || 0 }));
 
-            const wpBaslangic = document.getElementById('wpBaslangicTarih').value;
-            const wpBitis = document.getElementById('wpBitisTarih').value;
+            const wpBaslangic = document.getElementById('wpBaslangicTarih').value, wpBitis = document.getElementById('wpBitisTarih').value;
             if (wpBaslangic) unifiedLogs = unifiedLogs.filter(i => i.tarih >= wpBaslangic);
             if (wpBitis) unifiedLogs = unifiedLogs.filter(i => i.tarih <= wpBitis);
+            unifiedLogs.sort((a, b) => b.sortOrder - a.sortOrder);
 
-            unifiedLogs.sort((a, b) => {
-                if (sortField === 'tarih') { let comp = a.tarih.localeCompare(b.tarih); return sortDirection === 'asc' ? comp : -comp; }
-                else { return sortDirection === 'asc' ? a.tutar - b.tutar : b.tutar - a.tutar; }
-            });
-
-            const kasaBody = document.getElementById('kasaLogTable');
+            const showTime = appData.settings.showTransactionTime !== false, kasaBody = document.getElementById('kasaLogTable');
             kasaBody.innerHTML = '';
             if (unifiedLogs.length === 0) {
                 kasaBody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400">Kayıt bulunamadı.</td></tr>';
             } else {
                 unifiedLogs.forEach(log => {
                     const tr = document.createElement('tr');
-                    let badge = '';
-                    if (log.source === 'kasa') {
-                        if (log.tip === 'satis') {
-                            badge = `
-                                <div class="font-bold text-slate-100 mb-1">Günlük Satış Girişi</div>
-                                <div class="flex items-center space-x-1.5 text-[10px]">
-                                    <span class="px-2 py-0.5 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/50">Nakit (${log.nakit.toFixed(2)}₺)</span>
-                                    <span class="px-2 py-0.5 rounded-lg bg-blue-950 text-blue-400 border border-blue-800/50">Kredi (${log.kredi.toFixed(2)}₺)</span>
-                                </div>
-                            `;
-                        } else {
-                            badge = `<div class="font-bold text-slate-100">${log.baslik}</div><div class="mt-0.5"><span class="text-[9px] px-1.5 py-0.5 rounded-lg bg-rose-950 text-rose-400">Kasa Gider</span></div>`;
-                        }
-                    } else {
-                        badge = `<div class="font-bold text-slate-100">${log.baslik}</div><div class="mt-0.5">` + (log.tip === 'alis' ? '<span class="text-[9px] px-1.5 py-0.5 rounded-lg bg-amber-950 text-amber-400">Cari Mal Alışı</span>' : '<span class="text-[9px] px-1.5 py-0.5 rounded-lg bg-blue-950 text-blue-400">Cari Ödeme</span>') + `</div>`;
-                    }
-
-                    let islemSign = (log.source === 'kasa' && log.tip === 'satis') || (log.source === 'cari' && log.tip === 'alis') ? '+' : '-';
-                    let tClass = islemSign === '+' ? 'text-emerald-400' : 'text-rose-400';
-                    
-                    let actionsHtml = '';
-                    if(currentUserRole === 'admin') {
-                        actionsHtml = log.source === 'kasa' ? '<button onclick="openEditKasaModal(' + log.originalId + ')" class="text-blue-400 p-1"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button><button onclick="deleteKasaLog(' + log.originalId + ')" class="text-rose-400 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '<button onclick="deleteCariLogFromMaster(' + log.originalId + ')" class="text-rose-400 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>';
-                    }
-
-                    tr.innerHTML = '<td class="text-slate-300 text-[10px] align-top py-2">' + log.tarih + '</td><td class="align-top py-2">' + badge + '</td><td class="text-right font-bold ' + tClass + ' align-top py-2">' + islemSign + log.tutar.toFixed(2) + ' ₺</td><td class="text-center align-top space-x-1 py-2">' + actionsHtml + '</td>';
+                    let badge = log.source === 'kasa'
+                        ? (log.tip === 'satis' ? `<div class="font-bold text-slate-100 mb-1">Günlük Satış Girişi</div><div class="flex items-center space-x-1.5 text-[10px]"><span class="px-2 py-0.5 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/50">Nakit (${log.nakit.toFixed(2)}₺)</span><span class="px-2 py-0.5 rounded-lg bg-blue-950 text-blue-400 border border-blue-800/50">Kredi (${log.kredi.toFixed(2)}₺)</span></div>` : `<div class="font-bold text-slate-100">${log.baslik}</div><div class="mt-0.5"><span class="text-[9px] px-1.5 py-0.5 rounded-lg bg-rose-950 text-rose-400">Kasa Gider</span></div>`)
+                        : `<div class="font-bold text-slate-100">${log.baslik}</div><div class="mt-0.5">` + (log.tip === 'alis' ? '<span class="text-[9px] px-1.5 py-0.5 rounded-lg bg-amber-950 text-amber-400">Cari Mal Alışı</span>' : '<span class="text-[9px] px-1.5 py-0.5 rounded-lg bg-blue-950 text-blue-400">Cari Ödeme</span>') + `</div>`;
+                    const islemSign = (log.source === 'kasa' && log.tip === 'satis') || (log.source === 'cari' && log.tip === 'alis') ? '+' : '-';
+                    const tClass = islemSign === '+' ? 'text-emerald-400' : 'text-rose-400';
+                    const actionsHtml = currentUserRole === 'admin' ? (log.source === 'kasa' ? '<button onclick="openEditKasaModal(' + log.originalId + ')" class="text-blue-400 p-1"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button><button onclick="deleteKasaLog(' + log.originalId + ')" class="text-rose-400 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '<button onclick="deleteCariLogFromMaster(' + log.originalId + ')" class="text-rose-400 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>') : '';
+                    const dateCellHtml = showTime ? `<div>${log.tarih}</div><div class="text-[9px] text-emerald-400/90 font-semibold mt-0.5">${log.saat}</div>` : `<div>${log.tarih}</div>`;
+                    tr.innerHTML = '<td class="text-slate-300 text-[10px] align-top py-2">' + dateCellHtml + '</td><td class="align-top py-2">' + badge + '</td><td class="text-right font-bold ' + tClass + ' align-top py-2">' + islemSign + log.tutar.toFixed(2) + ' ₺</td><td class="text-center align-top space-x-1 py-2">' + actionsHtml + '</td>';
                     kasaBody.appendChild(tr);
                 });
             }
@@ -1129,10 +1019,7 @@
             if (summaryChart) { summaryChart.data.datasets[0].data = [nGelir, kGelir, toplamGider]; summaryChart.update(); }
         }
 
-        function setMaskableText(id, text) {
-            const el = document.getElementById(id);
-            if (el) { el.dataset.original = text; if(!appData.settings.isPrivate) el.innerText = text; }
-        }
+        function setMaskableText(id, text) { const el = document.getElementById(id); if (el) { el.dataset.original = text; if (!appData.settings.isPrivate) el.innerText = text; } }
 
         function initChart() {
             summaryChart = new Chart(document.getElementById('miniSummaryChart').getContext('2d'), {
@@ -1144,7 +1031,7 @@
 
         function shareCarilerWhatsapp() {
             let cariB = {};
-            appData.cariLogs.forEach(l => { if(!cariB[l.firma]) cariB[l.firma] = 0; if(l.tip === 'alis') cariB[l.firma] -= l.tutar; else cariB[l.firma] += l.tutar; });
+            appData.cariLogs.forEach(l => { if (!cariB[l.firma]) cariB[l.firma] = 0; if (l.tip === 'alis') cariB[l.firma] -= l.tutar; else cariB[l.firma] += l.tutar; });
             const firmalar = Object.keys(cariB);
             if (firmalar.length === 0) { alert("Cari firma yok."); return; }
             let text = "📋 *CARİ ÖZETİ*\n"; firmalar.forEach(f => text += "*" + f + "*: " + cariB[f].toFixed(2) + " ₺\n");
@@ -1152,16 +1039,16 @@
         }
 
         function shareKasaWhatsapp() {
+            const showTime = appData.settings.showTransactionTime !== false;
             let text = "📊 *TÜM HAREKETLER GÜNLÜĞÜ*\n";
-            appData.kasaLogs.forEach(l => text += "[" + l.tarih + "] " + l.aciklama + ": " + ((l.nakit||0)+(l.kredi||0)).toFixed(2) + " ₺\n");
+            appData.kasaLogs.slice().reverse().forEach(l => {
+                const saatStr = showTime ? ` ${l.saat || formatTimeFromId(l.id)}` : '';
+                text += "[" + l.tarih + saatStr + "] " + l.aciklama + ": " + ((l.nakit||0)+(l.kredi||0)).toFixed(2) + " ₺\n";
+            });
             window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text), '_blank');
         }
 
-        function openSettings() { 
-            if(currentUserRole === 'readonly') { alert("Bu alana sadece yönetici erişebilir."); return; }
-            document.getElementById('settingsModal').classList.remove('hidden'); 
-            document.getElementById('settingsModal').classList.add('flex'); 
-        }
+        function openSettings() { if (currentUserRole === 'readonly') { alert("Bu alana sadece yönetici erişebilir."); return; } document.getElementById('settingsModal').classList.remove('hidden'); document.getElementById('settingsModal').classList.add('flex'); }
         function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); document.getElementById('settingsModal').classList.remove('flex'); }
     </script>
 </body>
