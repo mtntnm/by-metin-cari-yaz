@@ -8,6 +8,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+    <!-- Firebase v8 Compat SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <style>
         body { font-size: 12px; font-family: system-ui, -apple-system, sans-serif; transition: background-color 0.3s, color 0.3s; }
         .dark-mode { background-color: #0b1920; color: #e2e8f0; }
@@ -27,50 +33,21 @@
     <div id="loginScreen" style="position:fixed;inset:0;background:#0b1920;z-index:99999;display:flex;justify-content:center;align-items:center;padding:20px;">
         <div style="background:#11222b;border:1px solid #334155;padding:24px;border-radius:16px;width:100%;max-width:320px;text-align:center;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
             <h2 style="color:#10b981;font-size:16px;font-weight:bold;margin-bottom:8px;">By METİN Cari & Kasa</h2>
-            <p style="color:#94a3b8;font-size:11px;margin-bottom:16px;">Lütfen erişim şifresini girin</p>
-            <input type="password" id="loginPasswordInput" placeholder="Şifre" style="width:100%;padding:10px;background:#09141a;border:1px solid #334155;border-radius:8px;color:#fff;font-size:14px;text-align:center;margin-bottom:12px;outline:none;">
-            <div style="display:flex;align-items:center;justify-content:center;margin-bottom:16px;gap:6px;cursor:pointer;">
+            <p style="color:#94a3b8;font-size:11px;margin-bottom:14px;">Bulut hesabı ve erişim şifresi</p>
+
+            <input type="email" id="firebaseEmailInput" value="gelgorkupa@gmail.com" placeholder="E-posta" style="width:100%;padding:9px;background:#09141a;border:1px solid #334155;border-radius:8px;color:#fff;font-size:12px;text-align:center;margin-bottom:8px;outline:none;">
+            <input type="password" id="firebasePasswordInput" placeholder="Firebase Şifresi" style="width:100%;padding:9px;background:#09141a;border:1px solid #334155;border-radius:8px;color:#fff;font-size:12px;text-align:center;margin-bottom:10px;outline:none;">
+
+            <input type="password" id="loginPasswordInput" placeholder="Uygulama Şifresi (opsiyonel)" style="width:100%;padding:10px;background:#09141a;border:1px solid #334155;border-radius:8px;color:#fff;font-size:13px;text-align:center;margin-bottom:12px;outline:none;">
+
+            <div style="display:flex;align-items:center;justify-content:center;margin-bottom:14px;gap:6px;cursor:pointer;">
                 <input type="checkbox" id="rememberMeCheck" style="width:14px;height:14px;accent-color:#10b981;cursor:pointer;">
                 <label for="rememberMeCheck" style="color:#cbd5e1;font-size:11px;cursor:pointer;">Beni Hatırla (Bir daha sorma)</label>
             </div>
-            <button onclick="checkAppLogin()" style="width:100%;background:#10b981;color:#fff;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">Giriş Yap</button>
-            <div id="loginErrorMsg" style="color:#f43f5e;font-size:10px;margin-top:10px;display:none;">Hatalı şifre! (Admin: m3444)</div>
+            <button onclick="checkAppLogin()" style="width:100%;background:#10b981;color:#fff;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">Giriş Yap & Eşitle</button>
+            <div id="loginErrorMsg" style="color:#f43f5e;font-size:10px;margin-top:10px;display:none;">Giriş başarısız!</div>
         </div>
     </div>
-
-    <script>
-        let DATA_VERSION = 'v13';
-        let savedData = JSON.parse(localStorage.getItem('by_metin_data_' + DATA_VERSION)) || {};
-        let savedSettings = savedData.settings || {};
-        let securityEnabled = savedSettings.securityEnabled !== undefined ? savedSettings.securityEnabled : true;
-        let adminPwd = savedSettings.adminPwd || "m3444";
-        let readonlyPwd = savedSettings.readonlyPwd || "3444";
-        let currentUserRole = "admin";
-        let isRemembered = localStorage.getItem('by_metin_remember_login') === 'true';
-
-        if (!securityEnabled || isRemembered) {
-            document.addEventListener("DOMContentLoaded", () => {
-                document.getElementById('loginScreen').style.display = 'none';
-            });
-        }
-
-        function checkAppLogin() {
-            let girilenSifre = document.getElementById('loginPasswordInput').value;
-            let remember = document.getElementById('rememberMeCheck').checked;
-            if (girilenSifre === adminPwd) {
-                currentUserRole = "admin";
-                if (remember) localStorage.setItem('by_metin_remember_login', 'true');
-                document.getElementById('loginScreen').style.display = 'none';
-            } else if (girilenSifre === readonlyPwd) {
-                currentUserRole = "readonly";
-                if (remember) localStorage.setItem('by_metin_remember_login', 'true');
-                document.body.classList.add("readonly-mode");
-                document.getElementById('loginScreen').style.display = 'none';
-            } else {
-                document.getElementById('loginErrorMsg').style.display = 'block';
-            }
-        }
-    </script>
 
     <div class="app-container relative">
         <header class="flex justify-between items-center px-4 pt-4 pb-2 border-b border-slate-800/80" id="mainHeader">
@@ -81,8 +58,12 @@
             <div class="text-center">
                 <div class="text-xs font-extrabold tracking-widest text-emerald-400" id="headerTitle">METİN</div>
                 <div class="text-[10px] text-slate-400 font-medium" id="headerSubTitle">Metin GEL GÖR</div>
+                <div class="text-[9px] text-emerald-400/90 font-semibold" id="cloudSyncBadge">Bulut: Bekleniyor</div>
             </div>
             <div class="flex items-center space-x-2">
+                <button onclick="syncNowFromCloud()" class="p-1.5 rounded-xl bg-[#11222b] border border-slate-700/80 hover:bg-slate-800 text-emerald-400" title="Buluttan Şimdi Çek">
+                    <i data-lucide="cloud-download" class="w-4 h-4"></i>
+                </button>
                 <button onclick="togglePrivacy()" id="privacyBtn" class="p-1.5 rounded-xl bg-[#11222b] border border-slate-700/80 hover:bg-slate-800" title="Bakiyeleri Gizle / Göster">
                     <i data-lucide="eye" class="w-4 h-4 text-emerald-400"></i>
                 </button>
@@ -477,7 +458,7 @@
                         <label class="block text-[9px] text-slate-400">Gözlemci Şifresi (Sadece Okuma)</label>
                         <input type="text" id="settingReadonlyPwd" onchange="updateSecuritySettings()" class="w-full p-2 bg-[#09141a] border border-slate-800 rounded-xl text-white text-xs">
                     </div>
-                    <button onclick="logoutAndForget()" class="w-full bg-amber-600/20 text-amber-400 hover:bg-amber-600/30 p-2.5 rounded-xl font-medium border border-amber-500/30 mt-1">Cihazdaki "Beni Hatırla"nı Unut (Şifre Sor)</button>
+                    <button onclick="logoutAndForget()" class="w-full bg-amber-600/20 text-amber-400 hover:bg-amber-600/30 p-2.5 rounded-xl font-medium border border-amber-500/30 mt-1">Cihazdaki "Beni Hatırla"nı Unut & Bulut Çıkışı Yap</button>
                 </div>
                 <div class="space-y-1 border-t border-slate-800 pt-2">
                     <label class="block text-[10px] font-semibold text-amber-400">Otomatik Yedek Sıklığı (Dakika)</label>
@@ -497,8 +478,40 @@
     </div>
 
     <script>
+        // --- FİREBASE YAPILANDIRMASI (hesap-v3) ---
+        const YETKILI_UID = "9dm3PSbAdXe7YxUfgFdzbre5lTm2";
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0HkBPDgkPI5PzLcSTKKwASVnGWpo7T5c",
+            authDomain: "hesap-v3.firebaseapp.com",
+            projectId: "hesap-v3",
+            storageBucket: "hesap-v3.firebasestorage.app",
+            messagingSenderId: "797830161443",
+            appId: "1:797830161443:web:7211f0c6314ad2b223fd96",
+            measurementId: "G-BT4MZ61ND6"
+        };
+
+        let firebaseApp = null, firebaseAuth = null, firestoreDb = null;
+        try {
+            if (window.firebase) {
+                firebaseApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+                firebaseAuth = firebase.auth();
+                firestoreDb = firebase.firestore();
+            }
+        } catch (err) {
+            console.error("Firebase başlatma hatası:", err);
+        }
+
         const DEFAULT_NAV_ORDER = ['notlar', 'islemler', 'gelir', 'gider'];
         let navEditMode = false;
+        let DATA_VERSION = 'v13';
+        let savedData = JSON.parse(localStorage.getItem('by_metin_data_' + DATA_VERSION)) || {};
+        let savedSettings = savedData.settings || {};
+        let securityEnabled = savedSettings.securityEnabled !== undefined ? savedSettings.securityEnabled : true;
+        let adminPwd = savedSettings.adminPwd || "m3444";
+        let readonlyPwd = savedSettings.readonlyPwd || "3444";
+        let currentUserRole = "admin";
+        let isRemembered = localStorage.getItem('by_metin_remember_login') === 'true';
+
         let appData = {
             kasaLogs: [],
             cariLogs: [],
@@ -514,7 +527,168 @@
                 navOrder: [...DEFAULT_NAV_ORDER]
             }
         };
-        let summaryChart = null, selectedCariFirma = '', autoBackupTimer = null;
+        let summaryChart = null, selectedCariFirma = '', autoBackupTimer = null, isSyncingCloud = false;
+
+        function setCloudBadge(text, colorClass = "text-emerald-400/90") {
+            const el = document.getElementById("cloudSyncBadge");
+            if (!el) return;
+            el.innerText = text;
+            el.className = "text-[9px] font-semibold " + colorClass;
+        }
+
+        // Doküman adayı listesi (mevcut hesap_v3_ana_veri kaydı dahil)
+        function getFirestoreDocRefs(uid) {
+            if (!firestoreDb) return [];
+            const refs = [
+                firestoreDb.collection("hesap_v3_ana_veri").doc("ana_veri"),
+                firestoreDb.collection("veriler").doc("hesap_v3_ana_veri")
+            ];
+            if (uid) {
+                refs.push(
+                    firestoreDb.collection("kullanicilar").doc(uid).collection("uygulama").doc("by_metin_data_v13")
+                );
+            }
+            return refs;
+        }
+
+        function getPrimaryFirestoreDocRef(uid) {
+            if (!firestoreDb) return null;
+            return firestoreDb.collection("hesap_v3_ana_veri").doc("ana_veri");
+        }
+
+        async function pushDataToFirestore(force = false) {
+            if (!firebaseAuth || !firestoreDb) return;
+            const user = firebaseAuth.currentUser;
+            if (!user || user.uid !== YETKILI_UID) return;
+            if (isSyncingCloud && !force) return;
+
+            try {
+                isSyncingCloud = true;
+                setCloudBadge("Bulut: Kaydediliyor...", "text-amber-400");
+                const ref = getPrimaryFirestoreDocRef(user.uid);
+                await ref.set({
+                    data: JSON.parse(JSON.stringify(appData)),
+                    kasaLogs: JSON.parse(JSON.stringify(appData.kasaLogs || [])),
+                    cariLogs: JSON.parse(JSON.stringify(appData.cariLogs || [])),
+                    settings: JSON.parse(JSON.stringify(appData.settings || {})),
+                    uid: user.uid,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                setCloudBadge("Bulut: Güncel (" + getCurrentTimeString() + ")", "text-emerald-400");
+            } catch (err) {
+                console.error("Firestore kayıt hatası:", err);
+                setCloudBadge("Bulut: Yazma Hatası", "text-rose-400");
+            } finally {
+                isSyncingCloud = false;
+            }
+        }
+
+        async function pullDataFromFirestore(uid) {
+            if (!firebaseAuth || !firestoreDb) return false;
+            const targetUid = uid || (firebaseAuth.currentUser && firebaseAuth.currentUser.uid);
+            if (!targetUid || targetUid !== YETKILI_UID) return false;
+
+            try {
+                isSyncingCloud = true;
+                setCloudBadge("Bulut: Çekiliyor...", "text-amber-400");
+                const refs = getFirestoreDocRefs(targetUid);
+                let loadedFromCloud = false;
+
+                for (const ref of refs) {
+                    const docSnap = await ref.get();
+                    if (docSnap.exists && docSnap.data()) {
+                        const raw = docSnap.data();
+                        const sourceData = raw.data || raw;
+                        const hasLogs = Array.isArray(sourceData.kasaLogs) || Array.isArray(sourceData.cariLogs);
+                        if (hasLogs || raw.data) {
+                            appData = {
+                                ...appData,
+                                ...sourceData,
+                                kasaLogs: Array.isArray(sourceData.kasaLogs) ? sourceData.kasaLogs : [],
+                                cariLogs: Array.isArray(sourceData.cariLogs) ? sourceData.cariLogs : [],
+                                settings: { ...appData.settings, ...(sourceData.settings || {}) }
+                            };
+                            localStorage.setItem('by_metin_data_' + DATA_VERSION, JSON.stringify(appData));
+                            applySettings();
+                            applyNavOrder();
+                            renderAll();
+                            setCloudBadge("Bulut: Senkron (" + getCurrentTimeString() + ")", "text-emerald-400");
+                            loadedFromCloud = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!loadedFromCloud) {
+                    await pushDataToFirestore(true);
+                }
+                return loadedFromCloud;
+            } catch (err) {
+                console.error("Firestore okuma hatası:", err);
+                setCloudBadge("Bulut: Okuma Hatası (" + (err.code || "izin") + ")", "text-rose-400");
+                return false;
+            } finally {
+                isSyncingCloud = false;
+            }
+        }
+
+        async function syncNowFromCloud() {
+            if (!firebaseAuth || !firebaseAuth.currentUser) {
+                document.getElementById('loginScreen').style.display = 'flex';
+                return;
+            }
+            await pullDataFromFirestore(firebaseAuth.currentUser.uid);
+        }
+
+        async function checkAppLogin() {
+            const errEl = document.getElementById('loginErrorMsg');
+            errEl.style.display = 'none';
+
+            const emailVal = (document.getElementById('firebaseEmailInput').value || 'gelgorkupa@gmail.com').trim();
+            const fbPassVal = document.getElementById('firebasePasswordInput').value;
+            const appPassVal = document.getElementById('loginPasswordInput').value;
+            const remember = document.getElementById('rememberMeCheck').checked;
+
+            if (appPassVal) {
+                if (appPassVal === readonlyPwd) {
+                    currentUserRole = "readonly";
+                    document.body.classList.add("readonly-mode");
+                } else if (appPassVal === adminPwd) {
+                    currentUserRole = "admin";
+                    document.body.classList.remove("readonly-mode");
+                } else {
+                    errEl.innerText = "Hatalı uygulama şifresi! (Admin: " + adminPwd + ")";
+                    errEl.style.display = 'block';
+                    return;
+                }
+            } else {
+                currentUserRole = "admin";
+                document.body.classList.remove("readonly-mode");
+            }
+
+            if (firebaseAuth && fbPassVal) {
+                try {
+                    const cred = await firebaseAuth.signInWithEmailAndPassword(emailVal, fbPassVal);
+                    if (cred.user.uid !== YETKILI_UID) {
+                        await firebaseAuth.signOut();
+                        throw new Error("Yetkisiz kullanıcı UID.");
+                    }
+                    await pullDataFromFirestore(cred.user.uid);
+                } catch (err) {
+                    errEl.innerText = "Bulut girişi başarısız: " + err.message;
+                    errEl.style.display = 'block';
+                    return;
+                }
+            } else if (!fbPassVal && !appPassVal && securityEnabled) {
+                errEl.innerText = "Lütfen Firebase şifresi veya uygulama şifresi girin.";
+                errEl.style.display = 'block';
+                return;
+            }
+
+            if (remember) localStorage.setItem('by_metin_remember_login', 'true');
+            document.getElementById('loginScreen').style.display = 'none';
+            renderAll();
+        }
 
         function getCurrentTimeString() {
             const now = new Date();
@@ -529,6 +703,9 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             loadLocalData();
+            if (!securityEnabled || isRemembered) {
+                document.getElementById('loginScreen').style.display = 'none';
+            }
             document.getElementById('satisTarih').valueAsDate = new Date();
             document.getElementById('odemeTarih').valueAsDate = new Date();
             lucide.createIcons();
@@ -537,6 +714,19 @@
             renderAll();
             applyNavOrder();
             startAutoBackupTimer();
+
+            if (firebaseAuth) {
+                firebaseAuth.onAuthStateChanged(async (user) => {
+                    if (user && user.uid === YETKILI_UID) {
+                        document.getElementById('loginScreen').style.display = 'none';
+                        await pullDataFromFirestore(user.uid);
+                    } else {
+                        setCloudBadge("Bulut: Çıkışlı", "text-slate-400");
+                    }
+                });
+            } else {
+                setCloudBadge("Bulut: Hazır Değil", "text-amber-400");
+            }
         });
 
         function loadLocalData() {
@@ -558,6 +748,7 @@
         function saveData() {
             localStorage.setItem('by_metin_data_' + DATA_VERSION, JSON.stringify(appData));
             renderAll();
+            pushDataToFirestore();
         }
 
         function getNavOrder() {
@@ -656,9 +847,12 @@
             alert("Güvenlik ayarları güncellendi!");
         }
 
-        function logoutAndForget() {
+        async function logoutAndForget() {
             localStorage.removeItem('by_metin_remember_login');
-            alert("Beni hatırla sıfırlandı. Uygulamayı yeniden açtığınızda şifre soracaktır.");
+            if (firebaseAuth && firebaseAuth.currentUser) {
+                try { await firebaseAuth.signOut(); } catch (e) {}
+            }
+            alert("Beni hatırla sıfırlandı ve bulut oturumu kapatıldı.");
             location.reload();
         }
 
@@ -688,7 +882,10 @@
             const infoEl = document.getElementById('autoBackupStatusInfo');
             if (intervalMinutes > 0) {
                 infoEl.innerText = 'Otomatik yedek aktif: Her ' + intervalMinutes + ' dakikada bir kaydedilir.';
-                autoBackupTimer = setInterval(() => { localStorage.setItem('by_metin_auto_backup', JSON.stringify(appData)); }, intervalMinutes * 60 * 1000);
+                autoBackupTimer = setInterval(() => {
+                    localStorage.setItem('by_metin_auto_backup', JSON.stringify(appData));
+                    pushDataToFirestore();
+                }, intervalMinutes * 60 * 1000);
             } else { infoEl.innerText = "Otomatik yedekleme kapalı."; }
         }
 
